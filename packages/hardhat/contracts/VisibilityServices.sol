@@ -93,14 +93,24 @@ contract VisibilityServices is AccessControlDefaultAdminRules {
 
 	uint256 public constant AUTO_VALIDATION_DELAY = 5 days; // Auto-validation delay period
 
+	bytes32 public constant DISPUTE_RESOLVER_ROLE =
+		keccak256("DISPUTE_RESOLVER_ROLE"); // Role identifier for dispute resolution
+
 	uint256 public servicesNonce; // Counter for service IDs
 	mapping(uint256 => Service) public services; // Mapping of services by nonce
 
 	IVisibilityCredits public immutable visibilityCredits; // Instance of visibility credits interface
 
+	/**
+	 * @dev Constructor to initialize the contract.
+	 * @param _visibilityCredits Address of the IVisibilityCredits contract.
+	 * @param disputeResolver Address for the dispute resolver role.
+	 */
 	constructor(
-		address _visibilityCredits
+		address _visibilityCredits,
+		address disputeResolver
 	) AccessControlDefaultAdminRules(3 days, msg.sender) {
+		_grantRole(DISPUTE_RESOLVER_ROLE, disputeResolver);
 		visibilityCredits = IVisibilityCredits(_visibilityCredits);
 	}
 
@@ -110,7 +120,7 @@ contract VisibilityServices is AccessControlDefaultAdminRules {
 	 * @param visibilityId The visibility ID associated with the service.
 	 * @param creditsCostAmount The cost in credits for the service.
 	 */
-	function create(
+	function createService(
 		string memory serviceType,
 		string memory visibilityId,
 		uint256 creditsCostAmount
@@ -125,6 +135,7 @@ contract VisibilityServices is AccessControlDefaultAdminRules {
 		services[nonce].creditsCostAmount = creditsCostAmount;
 		services[nonce].executionsNonce = 0;
 
+		servicesNonce += 1;
 		emit ServiceCreated(
 			nonce,
 			serviceType,
@@ -138,7 +149,7 @@ contract VisibilityServices is AccessControlDefaultAdminRules {
 	 * @param serviceNonce The ID of the service to update.
 	 * @param enabled The new status of the service (true for enabled, false for disabled).
 	 */
-	function update(uint256 serviceNonce, bool enabled) external {
+	function updateService(uint256 serviceNonce, bool enabled) external {
 		Service storage service = services[serviceNonce];
 		string memory visibilityId = service.visibilityId;
 
@@ -158,7 +169,29 @@ contract VisibilityServices is AccessControlDefaultAdminRules {
 		uint256 serviceNonce,
 		string calldata requestData
 	) external {
-		// TODO
+		Service storage service = services[serviceNonce];
+		if (!service.enabled) revert DisabledService();
+
+		uint256 executionNonce = service.executionsNonce;
+		service.executions[executionNonce].state = ExecutionState.REQUESTED;
+		service.executions[executionNonce].requester = msg.sender;
+		service.executions[executionNonce].lastUpdateTimestamp = block
+			.timestamp;
+
+		service.executionsNonce += 1;
+		visibilityCredits.transferCredits(
+			service.visibilityId,
+			msg.sender,
+			address(this),
+			service.creditsCostAmount
+		);
+
+		emit ServiceExecutionRequested(
+			serviceNonce,
+			executionNonce,
+			msg.sender,
+			requestData
+		);
 	}
 
 	/**
@@ -172,7 +205,24 @@ contract VisibilityServices is AccessControlDefaultAdminRules {
 		uint256 executionNonce,
 		string calldata responseData
 	) external {
-		// TODO
+		Service storage service = services[serviceNonce];
+		Execution storage execution = service.executions[executionNonce];
+
+		if (execution.state != ExecutionState.REQUESTED)
+			revert InvalidExecutionState();
+
+		string memory visibilityId = service.visibilityId;
+		(address creator, , ) = visibilityCredits.getVisibility(visibilityId);
+		if (creator != msg.sender) revert UnauthorizedExecutionAction();
+
+		execution.state = ExecutionState.ACCEPTED;
+		execution.lastUpdateTimestamp = block.timestamp;
+
+		emit ServiceExecutionAccepted(
+			serviceNonce,
+			executionNonce,
+			responseData
+		);
 	}
 
 	/**
@@ -186,7 +236,35 @@ contract VisibilityServices is AccessControlDefaultAdminRules {
 		uint256 executionNonce,
 		string calldata cancelData
 	) external {
-		// TODO
+		Service storage service = services[serviceNonce];
+		Execution storage execution = service.executions[executionNonce];
+
+		if (execution.state != ExecutionState.REQUESTED)
+			revert InvalidExecutionState();
+
+		address requester = execution.requester;
+
+		string memory visibilityId = service.visibilityId;
+		(address creator, , ) = visibilityCredits.getVisibility(visibilityId);
+		if (!(requester == msg.sender || creator == msg.sender))
+			revert UnauthorizedExecutionAction();
+
+		execution.state = ExecutionState.REFUNDED;
+		execution.lastUpdateTimestamp = block.timestamp;
+
+		visibilityCredits.transferCredits(
+			visibilityId,
+			address(this),
+			requester,
+			service.creditsCostAmount
+		);
+
+		emit ServiceExecutionCanceled(
+			serviceNonce,
+			executionNonce,
+			msg.sender,
+			cancelData
+		);
 	}
 
 	/**
@@ -198,7 +276,33 @@ contract VisibilityServices is AccessControlDefaultAdminRules {
 		uint256 serviceNonce,
 		uint256 executionNonce
 	) external {
-		// TODO
+		Service storage service = services[serviceNonce];
+		Execution storage execution = service.executions[executionNonce];
+
+		if (execution.state != ExecutionState.ACCEPTED)
+			revert InvalidExecutionState();
+
+		if (
+			!(execution.requester == msg.sender ||
+				(AUTO_VALIDATION_DELAY + execution.lastUpdateTimestamp <
+					block.timestamp))
+		) revert UnauthorizedExecutionAction();
+
+		(address creator, , ) = visibilityCredits.getVisibility(
+			service.visibilityId
+		);
+
+		execution.state = ExecutionState.VALIDATED;
+		execution.lastUpdateTimestamp = block.timestamp;
+
+		visibilityCredits.transferCredits(
+			service.visibilityId,
+			address(this),
+			creator,
+			service.creditsCostAmount
+		);
+
+		emit ServiceExecutionValidated(serviceNonce, executionNonce);
 	}
 
 	/**
@@ -212,7 +316,22 @@ contract VisibilityServices is AccessControlDefaultAdminRules {
 		uint256 executionNonce,
 		string calldata disputeData
 	) external {
-		// TODO
+		Service storage service = services[serviceNonce];
+		Execution storage execution = service.executions[executionNonce];
+
+		if (execution.state != ExecutionState.ACCEPTED)
+			revert InvalidExecutionState();
+		if (execution.requester != msg.sender)
+			revert UnauthorizedExecutionAction();
+
+		execution.state = ExecutionState.DISPUTED;
+		execution.lastUpdateTimestamp = block.timestamp;
+
+		emit ServiceExecutionDisputed(
+			serviceNonce,
+			executionNonce,
+			disputeData
+		);
 	}
 
 	/**
@@ -227,8 +346,42 @@ contract VisibilityServices is AccessControlDefaultAdminRules {
 		uint256 executionNonce,
 		bool refund,
 		string calldata resolveData
-	) external {
-		// TODO
+	) external onlyRole(DISPUTE_RESOLVER_ROLE) {
+		Service storage service = services[serviceNonce];
+		Execution storage execution = service.executions[executionNonce];
+
+		if (execution.state != ExecutionState.DISPUTED)
+			revert InvalidExecutionState();
+
+		if (refund) {
+			execution.state = ExecutionState.REFUNDED;
+			visibilityCredits.transferCredits(
+				service.visibilityId,
+				address(this),
+				execution.requester,
+				service.creditsCostAmount
+			);
+		} else {
+			execution.state = ExecutionState.VALIDATED;
+			(address creator, , ) = visibilityCredits.getVisibility(
+				service.visibilityId
+			);
+			visibilityCredits.transferCredits(
+				service.visibilityId,
+				address(this),
+				creator,
+				service.creditsCostAmount
+			);
+		}
+
+		execution.lastUpdateTimestamp = block.timestamp;
+
+		emit ServiceExecutionResolved(
+			serviceNonce,
+			executionNonce,
+			refund,
+			resolveData
+		);
 	}
 
 	/**
