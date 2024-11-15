@@ -1,0 +1,262 @@
+###################
+## Events entities
+###################
+
+type CreatorFeeClaimed @entity(timeseries: true) {
+  id: Int8!
+  creator: Bytes! # address
+  amount: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type CreatorVisibilitySet @entity(immutable: true) {
+  id: Bytes!
+  visibilityId: String! # string
+  creator: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type CreditsTrade @entity(timeseries: true) {
+  id: Int8!
+  tradeEvent_from: Bytes! # address
+  visibility: String! # string
+  tradeEvent_amount: BigInt! # uint256
+  tradeEvent_isBuy: Boolean! # bool
+  tradeEvent_tradeCost: BigInt! # uint256
+  tradeEvent_creatorFee: BigInt! # uint256
+  tradeEvent_protocolFee: BigInt! # uint256
+  tradeEvent_referrerFee: BigInt! # uint256
+  tradeEvent_referrer: Bytes! # address
+  tradeEvent_newTotalSupply: BigInt! # uint256
+  tradeEvent_newCurrentPrice: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type CreditsTransfer @entity(immutable: true) {
+  id: Bytes!
+  visibility: String! # string
+  from: Bytes! # address
+  to: Bytes! # address
+  amount: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type DefaultAdminDelayChangeCanceled @entity(immutable: true) {
+  id: Bytes!
+
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type DefaultAdminDelayChangeScheduled @entity(immutable: true) {
+  id: Bytes!
+  newDelay: BigInt! # uint48
+  effectSchedule: BigInt! # uint48
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type DefaultAdminTransferCanceled @entity(immutable: true) {
+  id: Bytes!
+
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type DefaultAdminTransferScheduled @entity(immutable: true) {
+  id: Bytes!
+  newAdmin: Bytes! # address
+  acceptSchedule: BigInt! # uint48
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type RoleAdminChanged @entity(immutable: true) {
+  id: Bytes!
+  role: Bytes! # bytes32
+  previousAdminRole: Bytes! # bytes32
+  newAdminRole: Bytes! # bytes32
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type RoleGranted @entity(immutable: true) {
+  id: Bytes!
+  role: Bytes! # bytes32
+  account: Bytes! # address
+  sender: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type RoleRevoked @entity(immutable: true) {
+  id: Bytes!
+  role: Bytes! # bytes32
+  account: Bytes! # address
+  sender: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type VisibilityServicesDefaultAdminDelayChangeCanceled
+  @entity(immutable: true) {
+  id: Bytes!
+
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type VisibilityServicesDefaultAdminDelayChangeScheduled
+  @entity(immutable: true) {
+  id: Bytes!
+  newDelay: BigInt! # uint48
+  effectSchedule: BigInt! # uint48
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type VisibilityServicesDefaultAdminTransferCanceled @entity(immutable: true) {
+  id: Bytes!
+
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type VisibilityServicesDefaultAdminTransferScheduled @entity(immutable: true) {
+  id: Bytes!
+  newAdmin: Bytes! # address
+  acceptSchedule: BigInt! # uint48
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type VisibilityServicesRoleAdminChanged @entity(immutable: true) {
+  id: Bytes!
+  role: Bytes! # bytes32
+  previousAdminRole: Bytes! # bytes32
+  newAdminRole: Bytes! # bytes32
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type VisibilityServicesRoleGranted @entity(immutable: true) {
+  id: Bytes!
+  role: Bytes! # bytes32
+  account: Bytes! # address
+  sender: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type VisibilityServicesRoleRevoked @entity(immutable: true) {
+  id: Bytes!
+  role: Bytes! # bytes32
+  account: Bytes! # address
+  sender: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type ServiceCreated @entity(immutable: true) {
+  id: Bytes!
+  nonce: BigInt! # uint256
+  serviceType: String! # string
+  visibility: String! # string
+  creditsCostAmount: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type ServiceExecutionAccepted @entity(immutable: true) {
+  id: Bytes!
+  serviceNonce: BigInt! # uint256
+  executionNonce: BigInt! # uint256
+  responseData: String! # string
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type ServiceExecutionCanceled @entity(immutable: true) {
+  id: Bytes!
+  serviceNonce: BigInt! # uint256
+  executionNonce: BigInt! # uint256
+  from: Bytes! # address
+  cancelData: String! # string
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type ServiceExecutionDisputed @entity(immutable: true) {
+  id: Bytes!
+  serviceNonce: BigInt! # uint256
+  executionNonce: BigInt! # uint256
+  disputeData: String! # string
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type ServiceExecutionRequested @entity(immutable: true) {
+  id: Bytes!
+  serviceNonce: BigInt! # uint256
+  executionNonce: BigInt! # uint256
+  requester: Bytes! # address
+  requestData: String! # string
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type ServiceExecutionResolved @entity(immutable: true) {
+  id: Bytes!
+  serviceNonce: BigInt! # uint256
+  executionNonce: BigInt! # uint256
+  refund: Boolean! # bool
+  resolveData: String! # string
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type ServiceExecutionValidated @entity(immutable: true) {
+  id: Bytes!
+  serviceNonce: BigInt! # uint256
+  executionNonce: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type ServiceUpdated @entity(immutable: true) {
+  id: Bytes!
+  nonce: BigInt! # uint256
+  enabled: Boolean! # bool
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}

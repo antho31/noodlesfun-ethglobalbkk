@@ -1,0 +1,118 @@
+specVersion: 1.0.0
+indexerHints:
+  prune: auto
+schema:
+  file: schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: VisibilityCredits
+    network: neonlabs
+    source:
+      address: "0xF39Cc5a1f1adA029de8C7F18D4687B438dEa45a2"
+      abi: VisibilityCredits
+      startBlock: 340306850
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - CreatorFeeClaimed
+        - CreatorVisibilitySet
+        - CreditsTrade
+        - CreditsTransfer
+        - DefaultAdminDelayChangeCanceled
+        - DefaultAdminDelayChangeScheduled
+        - DefaultAdminTransferCanceled
+        - DefaultAdminTransferScheduled
+        - RoleAdminChanged
+        - RoleGranted
+        - RoleRevoked
+      abis:
+        - name: VisibilityCredits
+          file: VisibilityCredits/VisibilityCredits.json
+      eventHandlers:
+        - event: CreatorFeeClaimed(indexed address,uint256)
+          handler: handleCreatorFeeClaimed
+        - event: CreatorVisibilitySet(string,address)
+          handler: handleCreatorVisibilitySet
+        - event: CreditsTrade((address,string,uint256,bool,uint256,uint256,uint256,uint256,address,uint256,uint256))
+          handler: handleCreditsTrade
+        - event: CreditsTransfer(string,indexed address,indexed address,uint256)
+          handler: handleCreditsTransfer
+        - event: DefaultAdminDelayChangeCanceled()
+          handler: handleDefaultAdminDelayChangeCanceled
+        - event: DefaultAdminDelayChangeScheduled(uint48,uint48)
+          handler: handleDefaultAdminDelayChangeScheduled
+        - event: DefaultAdminTransferCanceled()
+          handler: handleDefaultAdminTransferCanceled
+        - event: DefaultAdminTransferScheduled(indexed address,uint48)
+          handler: handleDefaultAdminTransferScheduled
+        - event: RoleAdminChanged(indexed bytes32,indexed bytes32,indexed bytes32)
+          handler: handleRoleAdminChanged
+        - event: RoleGranted(indexed bytes32,indexed address,indexed address)
+          handler: handleRoleGranted
+        - event: RoleRevoked(indexed bytes32,indexed address,indexed address)
+          handler: handleRoleRevoked
+      file: VisibilityCredits/VisibilityCredits.wasm
+  - kind: ethereum/contract
+    name: VisibilityServices
+    network: neonlabs
+    source:
+      abi: VisibilityServices
+      address: "0x00f463f093C66F2F0320237ca8766C536cf02972"
+      startBlock: 340306850
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - VisibilityServicesDefaultAdminDelayChangeCanceled
+        - VisibilityServicesDefaultAdminDelayChangeScheduled
+        - VisibilityServicesDefaultAdminTransferCanceled
+        - VisibilityServicesDefaultAdminTransferScheduled
+        - VisibilityServicesRoleAdminChanged
+        - VisibilityServicesRoleGranted
+        - VisibilityServicesRoleRevoked
+        - ServiceCreated
+        - ServiceExecutionAccepted
+        - ServiceExecutionCanceled
+        - ServiceExecutionDisputed
+        - ServiceExecutionRequested
+        - ServiceExecutionResolved
+        - ServiceExecutionValidated
+        - ServiceUpdated
+      abis:
+        - name: VisibilityServices
+          file: VisibilityServices/VisibilityServices.json
+      eventHandlers:
+        - event: DefaultAdminDelayChangeCanceled()
+          handler: handleDefaultAdminDelayChangeCanceled
+        - event: DefaultAdminDelayChangeScheduled(uint48,uint48)
+          handler: handleDefaultAdminDelayChangeScheduled
+        - event: DefaultAdminTransferCanceled()
+          handler: handleDefaultAdminTransferCanceled
+        - event: DefaultAdminTransferScheduled(indexed address,uint48)
+          handler: handleDefaultAdminTransferScheduled
+        - event: RoleAdminChanged(indexed bytes32,indexed bytes32,indexed bytes32)
+          handler: handleRoleAdminChanged
+        - event: RoleGranted(indexed bytes32,indexed address,indexed address)
+          handler: handleRoleGranted
+        - event: RoleRevoked(indexed bytes32,indexed address,indexed address)
+          handler: handleRoleRevoked
+        - event: ServiceCreated(indexed uint256,string,string,uint256)
+          handler: handleServiceCreated
+        - event: ServiceExecutionAccepted(indexed uint256,indexed uint256,string)
+          handler: handleServiceExecutionAccepted
+        - event: ServiceExecutionCanceled(indexed uint256,indexed uint256,indexed address,string)
+          handler: handleServiceExecutionCanceled
+        - event: ServiceExecutionDisputed(indexed uint256,indexed uint256,string)
+          handler: handleServiceExecutionDisputed
+        - event: ServiceExecutionRequested(indexed uint256,indexed uint256,indexed address,string)
+          handler: handleServiceExecutionRequested
+        - event: ServiceExecutionResolved(indexed uint256,indexed uint256,bool,string)
+          handler: handleServiceExecutionResolved
+        - event: ServiceExecutionValidated(indexed uint256,indexed uint256)
+          handler: handleServiceExecutionValidated
+        - event: ServiceUpdated(indexed uint256,bool)
+          handler: handleServiceUpdated
+      file: VisibilityServices/VisibilityServices.wasm
