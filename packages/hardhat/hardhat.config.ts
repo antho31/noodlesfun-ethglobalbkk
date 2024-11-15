@@ -22,10 +22,10 @@ const config: HardhatUserConfig = {
       {
         version: "0.8.20",
         settings: {
+          viaIR: true,
           optimizer: {
             enabled: true,
-            // https://docs.soliditylang.org/en/latest/using-the-compiler.html#optimizer-options
-            runs: 200,
+            runs: 10000,
           },
         },
       },
@@ -56,6 +56,9 @@ const config: HardhatUserConfig = {
       url: "https://devnet.neonevm.org",
       accounts: [deployerPrivateKey],
       chainId: 245022926,
+      allowUnlimitedContractSize: false,
+      gas: "auto",
+      gasPrice: "auto",
     },
   },
   // configuration for hardhat-verify plugin

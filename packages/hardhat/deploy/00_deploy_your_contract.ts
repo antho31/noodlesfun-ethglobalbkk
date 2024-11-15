@@ -3,12 +3,12 @@ import { DeployFunction } from "hardhat-deploy/types";
 import { Contract } from "ethers";
 
 /**
- * Deploys a contract named "YourContract" using the deployer account and
+ * Deploys contracts using the deployer account and
  * constructor arguments set to the deployer address
  *
  * @param hre HardhatRuntimeEnvironment object.
  */
-const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
+const deployment: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   /*
     On localhost, the deployer account is the one that comes with Hardhat, which is already funded.
 
@@ -22,23 +22,51 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
   const { deployer } = await hre.getNamedAccounts();
   const { deploy } = hre.deployments;
 
-  await deploy("YourContract", {
+  const deployerBalance = await hre.ethers.provider.getBalance(deployer);
+  console.log(
+    "Ready to deploy to ",
+    hre.network.name,
+    "with deployer : ",
+    deployer,
+    "Balance: ",
+    deployerBalance.toString(),
+  );
+
+  await deploy("VisibilityCredits", {
     from: deployer,
-    // Contract constructor arguments
-    args: [deployer],
+    args: [deployer, deployer],
     log: true,
-    // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
-    // automatically mining the contract deployment transaction. There is no effect on live networks.
-    autoMine: true,
   });
 
-  // Get the deployed contract to interact with it after deploying.
-  const yourContract = await hre.ethers.getContract<Contract>("YourContract", deployer);
-  console.log("👋 Initial greeting:", await yourContract.greeting());
+  const visibilityCredits = await hre.ethers.getContract<Contract>("VisibilityCredits", deployer);
+
+  const visibilityCreditsAddress = await visibilityCredits.getAddress();
+
+  console.log("VisibilityCredits deployed to:", visibilityCreditsAddress);
+
+  await deploy("VisibilityServices", {
+    from: deployer,
+    args: [visibilityCreditsAddress, deployer],
+    log: true,
+  });
+
+  const visibilityServices = await hre.ethers.getContract<Contract>("VisibilityServices", deployer);
+
+  const visibilityServicesAddress = await visibilityServices.getAddress();
+  console.log("VisibilityServices deployed to:", visibilityServicesAddress);
+
+  await visibilityCredits.grantCreatorTransferRole(visibilityServicesAddress);
+  console.log("CreatorTransferRole granted to:", visibilityServicesAddress);
+
+  await hre.run("verify:verify", {
+    address: visibilityCreditsAddress,
+    constructorArguments: [deployer, deployer],
+  });
+
+  await hre.run("verify:verify", {
+    address: visibilityServicesAddress,
+    constructorArguments: [visibilityCreditsAddress, deployer],
+  });
 };
 
-export default deployYourContract;
-
-// Tags are useful if you have multiple deploy files and only want to run one of them.
-// e.g. yarn deploy --tags YourContract
-deployYourContract.tags = ["YourContract"];
+export default deployment;
