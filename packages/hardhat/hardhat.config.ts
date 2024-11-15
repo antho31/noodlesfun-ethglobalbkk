@@ -13,8 +13,6 @@ import "hardhat-deploy-ethers";
 // If not set, it uses the hardhat account 0 private key.
 const deployerPrivateKey =
   process.env.DEPLOYER_PRIVATE_KEY ?? "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
-// If not set, it uses ours Etherscan default API key.
-const etherscanApiKey = process.env.ETHERSCAN_API_KEY || "DNXJA8RX2Q3VZ4URQIWP7Z68CJXQZSC6AW";
 // forking rpc url
 const forkingURL = process.env.FORKING_URL || "";
 
@@ -49,91 +47,40 @@ const config: HardhatUserConfig = {
         enabled: process.env.MAINNET_FORKING_ENABLED === "true",
       },
     },
-    mainnet: {
-      url: `https://cloudflare-eth.com`,
+    neon: {
+      url: "https://neon-proxy-mainnet.solana.p2p.org",
       accounts: [deployerPrivateKey],
+      chainId: 245022934,
     },
-    sepolia: {
-      url: `https://rpc2.sepolia.org`,
+    neondevnet: {
+      url: "https://devnet.neonevm.org",
       accounts: [deployerPrivateKey],
-    },
-    arbitrum: {
-      url: `https://arb1.arbitrum.io/rpc`,
-      accounts: [deployerPrivateKey],
-    },
-    arbitrumSepolia: {
-      url: `https://sepolia-rollup.arbitrum.io/rpc`,
-      accounts: [deployerPrivateKey],
-    },
-    optimism: {
-      url: `https://mainnet.optimism.io`,
-      accounts: [deployerPrivateKey],
-    },
-    optimismSepolia: {
-      url: `https://sepolia.optimism.io`,
-      accounts: [deployerPrivateKey],
-    },
-    polygon: {
-      url: `https://polygon-rpc.com`,
-      accounts: [deployerPrivateKey],
-    },
-    polygonMumbai: {
-      url: `https://rpc.ankr.com/polygon_mumbai`,
-      accounts: [deployerPrivateKey],
-    },
-    polygonZkEvm: {
-      url: `https://zkevm-rpc.com`,
-      accounts: [deployerPrivateKey],
-    },
-    polygonZkEvmTestnet: {
-      url: `https://rpc.public.zkevm-test.net`,
-      accounts: [deployerPrivateKey],
-    },
-    gnosis: {
-      url: "https://rpc.gnosischain.com",
-      accounts: [deployerPrivateKey],
-    },
-    chiado: {
-      url: "https://rpc.chiadochain.net",
-      accounts: [deployerPrivateKey],
-    },
-    base: {
-      url: "https://mainnet.base.org",
-      accounts: [deployerPrivateKey],
-    },
-    baseSepolia: {
-      url: "https://sepolia.base.org",
-      accounts: [deployerPrivateKey],
-    },
-    scrollSepolia: {
-      url: "https://sepolia-rpc.scroll.io",
-      accounts: [deployerPrivateKey],
-    },
-    scroll: {
-      url: "https://rpc.scroll.io",
-      accounts: [deployerPrivateKey],
-    },
-    pgn: {
-      url: "https://rpc.publicgoods.network",
-      accounts: [deployerPrivateKey],
-    },
-    pgnTestnet: {
-      url: "https://sepolia.publicgoods.network",
-      accounts: [deployerPrivateKey],
+      chainId: 245022926,
     },
   },
-  // configuration for harhdat-verify plugin
+  // configuration for hardhat-verify plugin
   etherscan: {
-    apiKey: `${etherscanApiKey}`,
-  },
-  // configuration for etherscan-verify from hardhat-deploy plugin
-  verify: {
-    etherscan: {
-      apiKey: `${etherscanApiKey}`,
+    apiKey: {
+      "neon-devnet": "empty",
     },
-  },
-  sourcify: {
-    enabled: false,
+    customChains: [
+      {
+        network: "neon",
+        chainId: 245022934,
+        urls: {
+          apiURL: "https://neon.blockscout.com/api",
+          browserURL: "https://neon.blockscout.com",
+        },
+      },
+      {
+        network: "neon-devnet",
+        chainId: 245022926,
+        urls: {
+          apiURL: "https://neon-devnet.blockscout.com/api",
+          browserURL: "https://neon-devnet.blockscout.com",
+        },
+      },
+    ],
   },
 };
 
