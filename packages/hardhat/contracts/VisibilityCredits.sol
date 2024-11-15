@@ -276,7 +276,7 @@ contract VisibilityCredits is
 			revert NotEnoughCreditsOwned();
 		}
 
-		visibility.creditBalances[from] += amount;
+		visibility.creditBalances[from] -= amount;
 		visibility.creditBalances[to] += amount;
 
 		emit CreditsTransfer(visibilityId, from, to, amount);
@@ -290,7 +290,7 @@ contract VisibilityCredits is
 	function updateTreasury(
 		address treasury
 	) external onlyRole(DEFAULT_ADMIN_ROLE) {
-		if (treasury != address(0)) {
+		if (treasury == address(0)) {
 			revert InvalidAddress();
 		}
 		protocolTreasury = payable(treasury);
