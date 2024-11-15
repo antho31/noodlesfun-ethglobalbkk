@@ -1,3 +1,52 @@
+enum ExecutionState {
+  UNINITIALIZED
+  REQUESTED
+  ACCEPTED
+  DISPUTED
+  REFUNDED
+  VALIDATED
+}
+
+type Visibility @entity {
+  id: String!
+  creator: Bytes # address
+  currentPrice: BigInt! # uint256
+  totalSupply: BigInt! # uint256
+  balances: [VisibilityBalance!]! @derivedFrom(field: "visibility")
+  trades: [CreditsTrade!]! @derivedFrom(field: "visibility")
+  services: [VisibilityService!]! @derivedFrom(field: "visibility")
+}
+
+type VisibilityBalance @entity {
+  id: String! # visibilityId-userAddress
+  visibility: Visibility!
+  user: Bytes! # address
+  balance: BigInt! # uint256
+}
+
+type VisibilityService @entity {
+  id: String! # serviceNonce
+  visibility: Visibility!
+  serviceType: String! # string
+  creditsCostAmount: BigInt! # uint256
+  enabled: Boolean! # bool
+  executions: [VisibilityServiceExecution!]! @derivedFrom(field: "service")
+}
+
+type VisibilityServiceExecution @entity {
+  id: String! # serviceNonce-executionNonce
+  state: ExecutionState!
+  service: VisibilityService!
+  executionNonce: BigInt! # uint256
+  requester: Bytes! # address
+  requestData: String! # string
+  responseData: String # string
+  cancelData: String # string
+  disputeData: String # string
+  resolveData: String # string
+  lastUpdated: BigInt! # uint256
+}
+
 ###################
 ## Events entities
 ###################
@@ -23,7 +72,7 @@ type CreatorVisibilitySet @entity(immutable: true) {
 type CreditsTrade @entity(timeseries: true) {
   id: Int8!
   tradeEvent_from: Bytes! # address
-  visibility: String! # string
+  visibility: Visibility! # string
   tradeEvent_amount: BigInt! # uint256
   tradeEvent_isBuy: Boolean! # bool
   tradeEvent_tradeCost: BigInt! # uint256
@@ -40,7 +89,7 @@ type CreditsTrade @entity(timeseries: true) {
 
 type CreditsTransfer @entity(immutable: true) {
   id: Bytes!
-  visibility: String! # string
+  visibility: Visibility! # string
   from: Bytes! # address
   to: Bytes! # address
   amount: BigInt! # uint256
@@ -183,7 +232,7 @@ type ServiceCreated @entity(immutable: true) {
   id: Bytes!
   nonce: BigInt! # uint256
   serviceType: String! # string
-  visibility: String! # string
+  visibility: Visibility! # string
   creditsCostAmount: BigInt! # uint256
   blockNumber: BigInt!
   blockTimestamp: BigInt!

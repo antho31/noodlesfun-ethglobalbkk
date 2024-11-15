@@ -6,7 +6,7 @@
 
 - **Privy:** Ties Twitter accounts to Ethereum wallets seamlessly.  
 - **Subgraph:** Fully decentralized data for promotion services and trading history.  
-  **Query URL:** [Subgraph Explorer](https://graph-secured.neontest.xyz/subgraphs/name/noodlesfun-neonevmdevnet/graphql)
+  **Query URL:** [Subgraph Explorer](https://graph-secured.neontest.xyz/subgraphs/name/noodlesfun-neonevmdevnet/graphql?query=%7B%0A++_meta+%7B%0A++++block+%7B%0A++++++number%0A++++%7D%0A++++hasIndexingErrors%0A++%7D%0A++visibilities+%7B+%0A++++id%0A++++creator%0A++++services+%7B%0A++++++id%0A++++++serviceType%0A++++++creditsCostAmount%0A++++++enabled%0A++++++executions+%7B%0A++++++++executionNonce%0A++++++++requester%0A++++++++state%0A++++++++requestData%0A++++++++responseData%0A++++++++cancelData%0A++++++++disputeData%0A++++++++resolveData%0A++++++++lastUpdated%0A++++++%7D%0A++++%7D%0A++%7D%0A%7D)
 - **Neon EVM L2:** Scalable Ethereum dApps on Solana's fast, low-cost infrastructure.
 - **Blockscout:** User-friendly blockchain explorer to verify and interact with deployed contracts.  
 
