@@ -200,6 +200,133 @@ contract VisibilityCredits is
 		emit CreditsTrade(tradeEvent);
 	}
 
+	/**
+	 * @notice Allows creators to claim their accumulated fees.
+	 * @param visibilityId The ID representing the visibility credits.
+	 */
+	function claimCreatorFee(
+		string calldata visibilityId
+	) external nonReentrant {
+		Visibility storage visibility = visibilityCredits[
+			getVisibilityKey(visibilityId)
+		];
+
+		uint256 claimableFeeBalance = visibility.claimableFeeBalance;
+
+		if (claimableFeeBalance == 0) {
+			revert InvalidAmount();
+		}
+
+		address creator = visibility.creator;
+
+		if (creator == address(0)) {
+			revert InvalidCreator();
+		}
+
+		visibility.claimableFeeBalance = 0;
+
+		Address.sendValue(payable(creator), claimableFeeBalance);
+
+		emit CreatorFeeClaimed(creator, claimableFeeBalance);
+	}
+
+	function grantCreatorTransferRole(
+		address grantee
+	) external onlyRole(DEFAULT_ADMIN_ROLE) {
+		_grantRole(CREDITS_TRANSFER_ROLE, grantee);
+	}
+
+	/**
+	 * @notice Sets the creator for a specific visibility ID.
+	 * @dev Only callable by an account with the `CREATORS_CHECKER_ROLE`.
+	 * @param visibilityId The ID representing the visibility credits.
+	 * @param creator The address of the creator, can be address(0).
+	 */
+	function setCreatorVisibility(
+		string calldata visibilityId,
+		address creator
+	) external onlyRole(CREATORS_CHECKER_ROLE) {
+		Visibility storage visibility = visibilityCredits[
+			getVisibilityKey(visibilityId)
+		];
+		visibility.creator = creator;
+
+		emit CreatorVisibilitySet(visibilityId, creator);
+	}
+
+	/**
+	 * @notice Transfers visibility credits between users.
+	 * @dev Only callable by an account with the `CREDITS_TRANSFER_ROLE`.
+	 * @param visibilityId The ID representing the visibility credits.
+	 * @param from The address to transfer credits from.
+	 * @param to The address to transfer credits to.
+	 * @param amount The amount of credits to transfer.
+	 */
+	function transferCredits(
+		string calldata visibilityId,
+		address from,
+		address to,
+		uint256 amount
+	) external onlyRole(CREDITS_TRANSFER_ROLE) {
+		Visibility storage visibility = visibilityCredits[
+			getVisibilityKey(visibilityId)
+		];
+
+		if (visibility.creditBalances[from] < amount) {
+			revert NotEnoughCreditsOwned();
+		}
+
+		visibility.creditBalances[from] += amount;
+		visibility.creditBalances[to] += amount;
+
+		emit CreditsTransfer(visibilityId, from, to, amount);
+	}
+
+	/**
+	 * @notice Updates the protocol treasury address.
+	 * @dev Only callable by an account with the `DEFAULT_ADMIN_ROLE`.
+	 * @param treasury The address of the new protocol treasury (cannot be address(0)).
+	 */
+	function updateTreasury(
+		address treasury
+	) external onlyRole(DEFAULT_ADMIN_ROLE) {
+		if (treasury != address(0)) {
+			revert InvalidAddress();
+		}
+		protocolTreasury = payable(treasury);
+	}
+
+	function getVisibility(
+		string calldata visibilityId
+	)
+		external
+		view
+		returns (
+			address creator,
+			uint256 totalSupply,
+			uint256 claimableFeeBalance
+		)
+	{
+		Visibility storage visibility = visibilityCredits[
+			getVisibilityKey(visibilityId)
+		];
+		return (
+			visibility.creator,
+			visibility.totalSupply,
+			visibility.claimableFeeBalance
+		);
+	}
+
+	function getVisibilityCreditBalance(
+		string calldata visibilityId,
+		address account
+	) external view returns (uint256) {
+		return
+			visibilityCredits[getVisibilityKey(visibilityId)].creditBalances[
+				account
+			];
+	}
+
 	function getVisibilityCurrentPrice(
 		string calldata visibilityId
 	) external view returns (uint256) {
