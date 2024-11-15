@@ -10,7 +10,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 // Mock data
-const featuredCreators = [
+export const featuredCreators = [
   {
     id: 1,
     name: "Elon Musk",
