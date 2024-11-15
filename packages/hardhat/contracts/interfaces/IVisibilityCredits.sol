@@ -2,6 +2,40 @@
 pragma solidity ^0.8.20;
 
 interface IVisibilityCredits {
+	struct CreditsTradeEvent {
+		address from;
+		string visibilityId;
+		uint256 amount;
+		bool isBuy;
+		uint256 tradeCost;
+		uint256 creatorFee;
+		uint256 protocolFee;
+		uint256 referrerFee;
+		address referrer;
+		uint256 newTotalSupply;
+		uint256 newCurrentPrice;
+	}
+
+	event CreatorFeeClaimed(address indexed creator, uint256 amount);
+
+	event CreatorVisibilitySet(string visibilityId, address creator);
+
+	event CreditsTrade(CreditsTradeEvent tradeEvent);
+
+	event CreditsTransfer(
+		string visibilityId,
+		address indexed from,
+		address indexed to,
+		uint256 amount
+	);
+
+	error InvalidAddress();
+	error InvalidCreator();
+	error InvalidAmount();
+	error InvalidFeeParams();
+	error NotEnoughEthSent();
+	error NotEnoughCreditsOwned();
+
 	function buyCredits(
 		string calldata visibilityId,
 		uint256 amount,
