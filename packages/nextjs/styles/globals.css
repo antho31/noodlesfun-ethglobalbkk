@@ -1,32 +1,59 @@
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
+@import url("https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap");
 
-:root,
-[data-theme] {
-  background: oklch(var(--b2));
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 250 16% 15%;
+    --foreground: 270 0% 100%;
+    --card: 252 11% 18%;
+    --card-foreground: 270 0% 100%;
+    --popover: 270 10% 5%;
+    --popover-foreground: 270 0% 100%;
+    --primary: 270 95.2% 75.3%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 270 10% 20%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 232 10% 25%;
+    --muted-foreground: 270 0% 65%;
+    --accent: 232 10% 25%;
+    --accent-foreground: 270 0% 95%;
+    --destructive: 0 50% 50%;
+    --destructive-foreground: 270 0% 100%;
+    --border: 270 20% 50%;
+    --input: 270 20% 50%;
+    --ring: 270 95.2% 75.3%;
+    --radius: 0.5rem;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
 }
 
-body {
-  min-height: 100vh;
+@layer base {
+  * {
+    @apply border-border;
+    font-family: "Nunito", sans-serif;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
 
-h1,
-h2,
-h3,
-h4 {
-  margin-bottom: 0.5rem;
-  line-height: 1;
-}
-
-p {
-  margin: 1rem 0;
-}
-
-.btn {
-  @apply shadow-md;
-}
-
-.btn.btn-ghost {
-  @apply shadow-none;
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
 }
