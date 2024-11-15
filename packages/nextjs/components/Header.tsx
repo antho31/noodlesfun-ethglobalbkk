@@ -6,7 +6,7 @@ import { useLoginWithOAuth, usePrivy } from "@privy-io/react-auth";
 import { LogOut, Settings, Wallet } from "lucide-react";
 import { SearchBar } from "@/components/Search";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -61,6 +61,15 @@ export const Header = () => {
           {/* desktop */}
           <nav className="items-center justify-center hidden gap-2 grow md:flex">
             <SearchBar className="max-w-[500px]" />
+            <a
+              rel="noreferrer noopener"
+              href="/kitchen"
+              className={`text-[17px] ${buttonVariants({
+                variant: "ghost",
+              })}`}
+            >
+              Kitchen
+            </a>
           </nav>
 
           <div className="gap-2 pl-3 md:flex">
