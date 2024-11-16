@@ -72,7 +72,8 @@ interface IVisibilityCredits {
 		returns (
 			address creator,
 			uint256 totalSupply,
-			uint256 claimableFeeBalance
+			uint256 claimableFeeBalance,
+			uint256 marketCap
 		);
 
 	function getVisibilityCreditBalance(

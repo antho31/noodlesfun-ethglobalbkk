@@ -41,6 +41,7 @@ const deployment: DeployFunction = async function (hre: HardhatRuntimeEnvironmen
   const visibilityCredits = await hre.ethers.getContract<Contract>("VisibilityCredits", deployer);
 
   const visibilityCreditsAddress = await visibilityCredits.getAddress();
+  //   "0x8209a3aE55404AD1C7a976Df37de3c53e56Bd4bE";
 
   console.log("VisibilityCredits deployed to:", visibilityCreditsAddress);
 

@@ -52,6 +52,13 @@ contract VisibilityCredits is
 
 	mapping(bytes32 => Visibility) public visibilityCredits;
 
+	// record of creator addresses and their visibility IDs
+	mapping(address => string) public creators;
+
+	// record of trades
+	uint256 public tradesNonce;
+	mapping(uint256 => CreditsTradeEvent) public trades;
+
 	constructor(
 		address treasury,
 		address creatorLinker
@@ -131,6 +138,9 @@ contract VisibilityCredits is
 			newCurrentPrice: _getCurrentPrice(totalSupply)
 		});
 
+		trades[tradesNonce] = tradeEvent;
+		tradesNonce++;
+
 		emit CreditsTrade(tradeEvent);
 	}
 
@@ -197,6 +207,9 @@ contract VisibilityCredits is
 			newCurrentPrice: _getCurrentPrice(totalSupply)
 		});
 
+		trades[tradesNonce] = tradeEvent;
+		tradesNonce++;
+
 		emit CreditsTrade(tradeEvent);
 	}
 
@@ -251,6 +264,8 @@ contract VisibilityCredits is
 		];
 		visibility.creator = creator;
 
+		creators[creator] = visibilityId;
+
 		emit CreatorVisibilitySet(visibilityId, creator);
 	}
 
@@ -304,17 +319,17 @@ contract VisibilityCredits is
 		returns (
 			address creator,
 			uint256 totalSupply,
-			uint256 claimableFeeBalance
+			uint256 claimableFeeBalance,
+			uint256 marketCap
 		)
 	{
 		Visibility storage visibility = visibilityCredits[
 			getVisibilityKey(visibilityId)
 		];
-		return (
-			visibility.creator,
-			visibility.totalSupply,
-			visibility.claimableFeeBalance
-		);
+		creator = visibility.creator;
+		totalSupply = visibility.totalSupply;
+		claimableFeeBalance = visibility.claimableFeeBalance;
+		marketCap = totalSupply * _getCurrentPrice(totalSupply);
 	}
 
 	function getVisibilityCreditBalance(

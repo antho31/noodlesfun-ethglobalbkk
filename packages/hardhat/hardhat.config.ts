@@ -51,6 +51,9 @@ const config: HardhatUserConfig = {
       url: "https://neon-proxy-mainnet.solana.p2p.org",
       accounts: [deployerPrivateKey],
       chainId: 245022934,
+      allowUnlimitedContractSize: false,
+      gas: "auto",
+      gasPrice: "auto",
     },
     neondevnet: {
       url: "https://devnet.neonevm.org",
@@ -65,6 +68,7 @@ const config: HardhatUserConfig = {
   etherscan: {
     apiKey: {
       "neon-devnet": "empty",
+      neon: "empty",
     },
     customChains: [
       {

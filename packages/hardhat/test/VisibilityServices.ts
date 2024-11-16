@@ -114,10 +114,12 @@ describe("VisibilityServices", function () {
     });
 
     it("Should accept a service execution correctly", async function () {
+      const responseData = "Response Data";
       await visibilityServices.connect(user1).requestServiceExecution(0, "Request Data");
-      await visibilityServices.connect(creator).acceptServiceExecution(0, 0, "Response Data");
-      const [state] = await visibilityServices.getServiceExecution(0, 0);
-
+      await visibilityServices.connect(creator).acceptServiceExecution(0, 0, responseData);
+      const execution = await visibilityServices.getServiceExecution(0, 0);
+      const [state, , , , res] = execution;
+      expect(res).to.equal(responseData);
       expect(state).to.equal(2); // ACCEPTED
     });
 

@@ -24,6 +24,11 @@ contract VisibilityServices is AccessControlDefaultAdminRules {
 		ExecutionState state; // Current state of the execution
 		address requester; // Address that requested the execution
 		uint256 lastUpdateTimestamp; // Timestamp of the last update
+		string requestData; // Data related to the request
+		string responseData; // Data related to the response
+		string cancelData; // Data related to the cancellation
+		string disputeData; // Data related to the dispute
+		string resolveData; // Data related to the resolution
 	}
 
 	// Struct representing a service
@@ -96,7 +101,7 @@ contract VisibilityServices is AccessControlDefaultAdminRules {
 	bytes32 public constant DISPUTE_RESOLVER_ROLE =
 		keccak256("DISPUTE_RESOLVER_ROLE"); // Role identifier for dispute resolution
 
-	uint256 public servicesNonce; // Counter for service IDs
+	uint256 public servicesNonce = 0; // Counter for service IDs
 	mapping(uint256 => Service) public services; // Mapping of services by nonce
 
 	IVisibilityCredits public immutable visibilityCredits; // Instance of visibility credits interface
@@ -125,7 +130,7 @@ contract VisibilityServices is AccessControlDefaultAdminRules {
 		string memory visibilityId,
 		uint256 creditsCostAmount
 	) external {
-		(address creator, , ) = visibilityCredits.getVisibility(visibilityId);
+		(address creator, , , ) = visibilityCredits.getVisibility(visibilityId);
 		if (creator != msg.sender) revert InvalidCreator();
 
 		uint256 nonce = servicesNonce;
@@ -153,7 +158,7 @@ contract VisibilityServices is AccessControlDefaultAdminRules {
 		Service storage service = services[serviceNonce];
 		string memory visibilityId = service.visibilityId;
 
-		(address creator, , ) = visibilityCredits.getVisibility(visibilityId);
+		(address creator, , , ) = visibilityCredits.getVisibility(visibilityId);
 		if (creator != msg.sender) revert InvalidCreator();
 
 		service.enabled = enabled;
@@ -177,6 +182,7 @@ contract VisibilityServices is AccessControlDefaultAdminRules {
 		service.executions[executionNonce].requester = msg.sender;
 		service.executions[executionNonce].lastUpdateTimestamp = block
 			.timestamp;
+		service.executions[executionNonce].requestData = requestData;
 
 		service.executionsNonce += 1;
 		visibilityCredits.transferCredits(
@@ -212,9 +218,10 @@ contract VisibilityServices is AccessControlDefaultAdminRules {
 			revert InvalidExecutionState();
 
 		string memory visibilityId = service.visibilityId;
-		(address creator, , ) = visibilityCredits.getVisibility(visibilityId);
+		(address creator, , , ) = visibilityCredits.getVisibility(visibilityId);
 		if (creator != msg.sender) revert UnauthorizedExecutionAction();
 
+		execution.responseData = responseData;
 		execution.state = ExecutionState.ACCEPTED;
 		execution.lastUpdateTimestamp = block.timestamp;
 
@@ -245,10 +252,11 @@ contract VisibilityServices is AccessControlDefaultAdminRules {
 		address requester = execution.requester;
 
 		string memory visibilityId = service.visibilityId;
-		(address creator, , ) = visibilityCredits.getVisibility(visibilityId);
+		(address creator, , , ) = visibilityCredits.getVisibility(visibilityId);
 		if (!(requester == msg.sender || creator == msg.sender))
 			revert UnauthorizedExecutionAction();
 
+		execution.cancelData = cancelData;
 		execution.state = ExecutionState.REFUNDED;
 		execution.lastUpdateTimestamp = block.timestamp;
 
@@ -288,7 +296,7 @@ contract VisibilityServices is AccessControlDefaultAdminRules {
 					block.timestamp))
 		) revert UnauthorizedExecutionAction();
 
-		(address creator, , ) = visibilityCredits.getVisibility(
+		(address creator, , , ) = visibilityCredits.getVisibility(
 			service.visibilityId
 		);
 
@@ -324,6 +332,7 @@ contract VisibilityServices is AccessControlDefaultAdminRules {
 		if (execution.requester != msg.sender)
 			revert UnauthorizedExecutionAction();
 
+		execution.disputeData = disputeData;
 		execution.state = ExecutionState.DISPUTED;
 		execution.lastUpdateTimestamp = block.timestamp;
 
@@ -363,7 +372,7 @@ contract VisibilityServices is AccessControlDefaultAdminRules {
 			);
 		} else {
 			execution.state = ExecutionState.VALIDATED;
-			(address creator, , ) = visibilityCredits.getVisibility(
+			(address creator, , , ) = visibilityCredits.getVisibility(
 				service.visibilityId
 			);
 			visibilityCredits.transferCredits(
@@ -374,6 +383,7 @@ contract VisibilityServices is AccessControlDefaultAdminRules {
 			);
 		}
 
+		execution.resolveData = resolveData;
 		execution.lastUpdateTimestamp = block.timestamp;
 
 		emit ServiceExecutionResolved(
@@ -401,7 +411,12 @@ contract VisibilityServices is AccessControlDefaultAdminRules {
 		returns (
 			ExecutionState state,
 			address requester,
-			uint256 lastUpdateTimestamp
+			uint256 lastUpdateTimestamp,
+			string memory requestData,
+			string memory responseData,
+			string memory cancelData,
+			string memory disputeData,
+			string memory resolveData
 		)
 	{
 		Execution storage execution = services[serviceNonce].executions[
@@ -410,7 +425,12 @@ contract VisibilityServices is AccessControlDefaultAdminRules {
 		return (
 			execution.state,
 			execution.requester,
-			execution.lastUpdateTimestamp
+			execution.lastUpdateTimestamp,
+			execution.requestData,
+			execution.responseData,
+			execution.cancelData,
+			execution.disputeData,
+			execution.resolveData
 		);
 	}
 }

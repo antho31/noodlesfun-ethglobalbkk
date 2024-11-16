@@ -26,8 +26,8 @@ describe("VisibilityCredits", function () {
   });
 
   describe("Initial Setup", function () {
-    it("Should set the correct protocol treasury", async function () {
-      expect(await creditsContract.protocolTreasury()).to.be.equal(treasury.address);
+    it("Should set the correct creator for visibility", async function () {
+      expect(await creditsContract.creators(creator1.address)).to.be.equal(visibilityId1);
     });
 
     it("Should assign creatorLinker the CREATORS_CHECKER_ROLE", async function () {
@@ -45,6 +45,9 @@ describe("VisibilityCredits", function () {
 
       const balance = await creditsContract.getVisibilityCreditBalance(visibilityId1, user1.address);
       expect(balance).to.be.equal(amount);
+
+      const tradeEvent = await creditsContract.trades(0);
+      expect(tradeEvent[1]).to.be.deep.equal(visibilityId1);
     });
 
     it("Should revert if insufficient Ether is sent", async function () {
