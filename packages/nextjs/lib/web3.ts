@@ -15,7 +15,9 @@ export async function getWalletBalance(walletAddress: string) {
 
 export async function getSharesCount(visibilityId: string, account: string) {
   const data = await publicClient.readContract({
+    // @ts-ignore
     address: deployedContracts[chain.id].VisibilityCredits.address,
+    // @ts-ignore
     abi: deployedContracts[chain.id].VisibilityCredits.abi,
     functionName: "getVisibilityCreditBalance",
     args: [visibilityId, account as Hash],
@@ -30,7 +32,9 @@ export async function getBuyPrice(
   referer: string = "0x0000000000000000000000000000000000000000",
 ) {
   const data = await publicClient.readContract({
+    // @ts-ignore
     address: deployedContracts[chain.id].VisibilityCredits.address,
+    // @ts-ignore
     abi: deployedContracts[chain.id].VisibilityCredits.abi,
     functionName: "buyCostWithFees",
     args: [token, amount, referer],
@@ -45,7 +49,9 @@ export async function getSellPrice(
   referer: string = "0x0000000000000000000000000000000000000000",
 ) {
   const data = await publicClient.readContract({
+    // @ts-ignore
     address: deployedContracts[chain.id].VisibilityCredits.address,
+    // @ts-ignore
     abi: deployedContracts[chain.id].VisibilityCredits.abi,
     functionName: "sellCostWithFees",
     args: [token, amount, referer],

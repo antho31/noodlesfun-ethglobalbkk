@@ -1,16 +1,17 @@
 {
-    "name": "noodlesfun-graph",
-    "license": "UNLICENSED",
-    "scripts": {
-        "codegen": "graph codegen",
-        "build": "graph codegen && graph build",
-        "test": "graph test -d"
-    },
-    "dependencies": {
-        "@graphprotocol/graph-cli": "0.88.0",
-        "@graphprotocol/graph-ts": "0.32.0"
-    },
-    "devDependencies": {
-        "matchstick-as": "0.5.0"
-    }
+  "name": "noodlesfun-graph",
+  "license": "UNLICENSED",
+  "scripts": {
+    "codegen": "graph codegen",
+    "build": "graph codegen && graph build",
+    "deploy": "graph deploy noodlesfun-scrollsepolia",
+    "test": "graph test -d"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "0.88.0",
+    "@graphprotocol/graph-ts": "0.32.0"
+  },
+  "devDependencies": {
+    "matchstick-as": "0.5.0"
+  }
 }

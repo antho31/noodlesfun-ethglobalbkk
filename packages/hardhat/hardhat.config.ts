@@ -63,12 +63,19 @@ const config: HardhatUserConfig = {
       gas: "auto",
       gasPrice: "auto",
     },
+
+    scrollSepolia: {
+      url: "https://sepolia-rpc.scroll.io/",
+      accounts: [deployerPrivateKey],
+    },
   },
+
   // configuration for hardhat-verify plugin
   etherscan: {
     apiKey: {
       "neon-devnet": "empty",
       neon: "empty",
+      scrollSepolia: process.env.SCROLLSCAN_API_KEY as string,
     },
     customChains: [
       {
@@ -85,6 +92,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://neon-devnet.blockscout.com/api",
           browserURL: "https://neon-devnet.blockscout.com",
+        },
+      },
+      {
+        network: "scrollSepolia",
+        chainId: 534351,
+        urls: {
+          apiURL: "https://api-sepolia.scrollscan.com/api",
+          browserURL: "https://sepolia.scrollscan.com/",
         },
       },
     ],

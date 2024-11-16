@@ -30,7 +30,9 @@ import {
 import { log } from 'matchstick-as'
 
 export function handleCreatorFeeClaimed(event: CreatorFeeClaimedEvent): void {
-  let entity = new CreatorFeeClaimed('auto')
+  let entity = new CreatorFeeClaimed(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
   entity.creator = event.params.creator
   entity.amount = event.params.amount
 
@@ -119,7 +121,9 @@ export function handleCreditsTrade(event: CreditsTradeEvent): void {
 
   visibilityBalance.save()
 
-  let entity = new CreditsTrade('auto')
+  let entity = new CreditsTrade(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
   entity.tradeEvent_from = event.params.tradeEvent.from
   entity.visibility = visibility.id
   entity.tradeEvent_amount = event.params.tradeEvent.amount

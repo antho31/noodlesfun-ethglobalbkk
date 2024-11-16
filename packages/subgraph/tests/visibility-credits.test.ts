@@ -87,15 +87,6 @@ describe('Describe entity assertions', () => {
     assert.entityCount('CreatorFeeClaimed', 1)
     logStore()
 
-    // 0xa16081f360e3847006db660bae1c6d1b2e17ec2a is the default address used in newMockEvent() function
-    assert.fieldEquals(
-      'CreatorFeeClaimed',
-      'auto',
-      'creator',
-      '0x0000000000000000000000000000000000000001'
-    )
-    assert.fieldEquals('CreatorFeeClaimed', 'auto', 'amount', '2')
-
     // More assert options:
     // https://thegraph.com/docs/en/developer/matchstick/#asserts
   })

@@ -5,9 +5,9 @@
 import { GenericContractsDeclaration } from "@/utils/scaffold-eth/contract";
 
 const deployedContracts = {
-  245022926: {
+  534351: {
     VisibilityCredits: {
-      address: "0xF39Cc5a1f1adA029de8C7F18D4687B438dEa45a2",
+      address: "0x6C865dca5a9777C004Afb14E5F0aC2ddE403C7f8",
       abi: [
         {
           inputs: [
@@ -673,6 +673,25 @@ const deployedContracts = {
           type: "function",
         },
         {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "creators",
+          outputs: [
+            {
+              internalType: "string",
+              name: "",
+              type: "string",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
           inputs: [],
           name: "defaultAdmin",
           outputs: [
@@ -753,6 +772,11 @@ const deployedContracts = {
             {
               internalType: "uint256",
               name: "claimableFeeBalance",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "marketCap",
               type: "uint256",
             },
           ],
@@ -1093,6 +1117,88 @@ const deployedContracts = {
         {
           inputs: [
             {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          name: "trades",
+          outputs: [
+            {
+              internalType: "address",
+              name: "from",
+              type: "address",
+            },
+            {
+              internalType: "string",
+              name: "visibilityId",
+              type: "string",
+            },
+            {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+            {
+              internalType: "bool",
+              name: "isBuy",
+              type: "bool",
+            },
+            {
+              internalType: "uint256",
+              name: "tradeCost",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "creatorFee",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "protocolFee",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "referrerFee",
+              type: "uint256",
+            },
+            {
+              internalType: "address",
+              name: "referrer",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "newTotalSupply",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "newCurrentPrice",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "tradesNonce",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
               internalType: "string",
               name: "visibilityId",
               type: "string",
@@ -1195,7 +1301,7 @@ const deployedContracts = {
       },
     },
     VisibilityServices: {
-      address: "0x00f463f093C66F2F0320237ca8766C536cf02972",
+      address: "0xA5a103ac4aC7298D02CCA272a8CEFb6f7B047e31",
       abi: [
         {
           inputs: [
@@ -1897,6 +2003,31 @@ const deployedContracts = {
               internalType: "uint256",
               name: "lastUpdateTimestamp",
               type: "uint256",
+            },
+            {
+              internalType: "string",
+              name: "requestData",
+              type: "string",
+            },
+            {
+              internalType: "string",
+              name: "responseData",
+              type: "string",
+            },
+            {
+              internalType: "string",
+              name: "cancelData",
+              type: "string",
+            },
+            {
+              internalType: "string",
+              name: "disputeData",
+              type: "string",
+            },
+            {
+              internalType: "string",
+              name: "resolveData",
+              type: "string",
             },
           ],
           stateMutability: "view",

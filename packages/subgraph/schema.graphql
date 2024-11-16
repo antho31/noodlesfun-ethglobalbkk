@@ -51,8 +51,8 @@ type VisibilityServiceExecution @entity {
 ## Events entities
 ###################
 
-type CreatorFeeClaimed @entity(timeseries: true) {
-  id: Int8!
+type CreatorFeeClaimed @entity(immutable: true) {
+  id: Bytes!
   creator: Bytes! # address
   amount: BigInt! # uint256
   blockNumber: BigInt!
@@ -69,8 +69,8 @@ type CreatorVisibilitySet @entity(immutable: true) {
   transactionHash: Bytes!
 }
 
-type CreditsTrade @entity(timeseries: true) {
-  id: Int8!
+type CreditsTrade @entity(immutable: true) {
+  id: Bytes!
   tradeEvent_from: Bytes! # address
   visibility: Visibility! # string
   tradeEvent_amount: BigInt! # uint256

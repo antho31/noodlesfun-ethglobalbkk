@@ -158,6 +158,7 @@ export default function Bento({ username }: { username: string }) {
     const provider = await wallet.getEthereumProvider();
 
     const writeData = encodeFunctionData({
+      // @ts-ignore
       abi: deployedContracts[chain.id].VisibilityCredits.abi,
       functionName: "buyCredits",
       args: [`x-${username}`, BigInt(amount), "0x0000000000000000000000000000000000000000"],
@@ -165,6 +166,7 @@ export default function Bento({ username }: { username: string }) {
 
     const price = await getBuyPrice(`x-${username}`, BigInt(amount));
     const transactionRequest = {
+      // @ts-ignore
       to: deployedContracts[chain.id].VisibilityCredits.address,
       data: writeData,
       value: BigInt(price),
@@ -203,12 +205,14 @@ export default function Bento({ username }: { username: string }) {
 
     const price = await getSellPrice(`x-${username}`, BigInt(amount));
     const writeData = encodeFunctionData({
+      // @ts-ignore
       abi: deployedContracts[chain.id].VisibilityCredits.abi,
       functionName: "sellCredits",
       args: [`x-${username}`, BigInt(amount), "0x0000000000000000000000000000000000000000"],
     });
 
     const transactionRequest = {
+      // @ts-ignore
       to: deployedContracts[chain.id].VisibilityCredits.address,
       data: writeData,
     };
