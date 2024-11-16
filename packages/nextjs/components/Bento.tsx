@@ -1,7 +1,7 @@
 "use client";
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { Link, Share2 } from "lucide-react";
@@ -31,6 +31,14 @@ export default function Bento({ username }: { username: string }) {
   const [tweetUrl, setTweetUrl] = useState("");
 
   const visibilityId = `x-${username}`;
+
+  /*
+    useEffect(() => {
+    if (user && user.wallet) {
+      console.log("User wallet found", user.wallet, user);
+    }
+  }, []);
+  */
 
   const userBalanceQuery = useQuery({
     queryKey: ["balances", user?.wallet?.address],

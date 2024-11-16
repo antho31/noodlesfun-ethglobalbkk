@@ -59,10 +59,12 @@ export default async function Profile({ params }: { params: { username: string }
           stats={[
             { label: "Following", value: data?.following },
             { label: "Followers", value: data?.followers },
-            {
+
+            /*{
               label: "Market Cap",
               value: "420.69$",
             },
+            */
           ]}
         />
         <Bento username={username} />

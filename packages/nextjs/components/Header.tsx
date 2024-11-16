@@ -36,7 +36,7 @@ export const Header = () => {
   useEffect(() => {
     async function init() {
       if (user && !user.wallet) {
-        createWallet();
+        await createWallet();
         return;
       } else if (user && user.wallet) {
         const balance = await getWalletBalance(user.wallet.address);
