@@ -175,10 +175,20 @@ export default function Bento({ username }: { username: string }) {
     setAmount(value.toString());
   };
 
-  const handleQuickSell = (percentage: number) => {
-    const sellAmount = ((maxSellAmount * percentage) / 100).toFixed(8);
-    setAmount(sellAmount);
-  };
+  //   const handleQuickSell = (percentage: number) => {
+  //     const sellAmount = ((maxSellAmount * percentage) / 100).toFixed(8);
+  //     setAmount(sellAmount);
+  //   };
+
+  //   TODO: GET TRADES DATA
+  // FORMAT:
+  // { time: "2018-12-22", value: 32.51 },
+
+  // TODO: GET ACTIVITY DATA, last 10
+  // username, type (buy/sell), price, amount, timeAgo, link
+
+  // TODO: GET TOP HOLDERS DATA
+  // username, balance, percentage, link to their profile
 
   return (
     <div className="mt-4 mb-12">
@@ -192,16 +202,14 @@ export default function Bento({ username }: { username: string }) {
                 <Share2 className="w-4 h-4 mr-0" />
                 Share
               </Button>
-              {/* <Button variant="outline" size="sm">
-                                <Camera className="w-4 h-4 mr-0" />
-                            </Button> */}
+
               <Button variant="outline" size="sm">
-                {/* <TrendingUp className="w-4 h-4 mr-2" /> */}
                 🤙 Flex
               </Button>
             </div>
           </div>
           <div className="overflow-hidden rounded-md aspect-video">
+            {/* TODO: TRADES */}
             {[].length > 0 ? (
               <ChartComponent data={[]} />
             ) : (
@@ -374,6 +382,7 @@ export default function Bento({ username }: { username: string }) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
+                  {/* TODO: ACTIVITY FROM GRAPHQL AND NOT LOCAL */}
                   {activity.map((item, index) => (
                     <TableRow key={index}>
                       <TableCell className="flex items-center space-x-2">
@@ -410,6 +419,7 @@ export default function Bento({ username }: { username: string }) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
+                  {/* TODO: ? MAYBE WE SKIP IT */}
                   {/* {[].map((holder, index) => (
                     <TableRow key={index}>
                       <TableCell className="flex items-center space-x-2">
@@ -448,7 +458,14 @@ export default function Bento({ username }: { username: string }) {
                   value={tweetContent}
                   onChange={e => setTweetContent(e.target.value)}
                 />
-                <Button className="w-full">Submit</Button>
+                <Button
+                  className="w-full"
+                  onClick={() => {
+                    //   TODO: LOGIC HERE TO SUBMIT TWEET
+                  }}
+                >
+                  Submit
+                </Button>
                 <p className="text-sm text-muted-foreground">Required amount 10 🍜</p>
               </div>
             </TabsContent>

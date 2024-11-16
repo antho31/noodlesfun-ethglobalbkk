@@ -70,7 +70,7 @@ export async function getVisibility(token: string) {
     args: [token],
   });
 
-  return data; // creator, supply, claimable fee balance
+  return data; // creator, supply, claimable fee, balance
 }
 
 export async function getCurrentPrice(token: string) {
