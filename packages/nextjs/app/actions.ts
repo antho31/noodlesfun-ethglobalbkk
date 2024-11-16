@@ -3,14 +3,13 @@
 import { PrivyClient } from "@privy-io/server-auth";
 import { createPublicClient, createWalletClient, getAddress, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import * as chains from "viem/chains";
-import { chain } from "@/components/Providers";
+import { scrollSepolia } from "viem/chains";
+import deployedContracts from "@/contracts/deployedContracts";
 
 // import deployedContractsData from "@/contracts/";
 
-const chainId = chain.id;
-
 export async function link(username: string) {
+  const chainId = scrollSepolia.id;
   console.log("LINK", { username, chainId });
 
   const { LINKER_PRIVATE_KEY, PRIVY_ID, PRIVY_SECRET } = process.env;
@@ -26,20 +25,15 @@ export async function link(username: string) {
     return { error: "Missing required parameter: chainId" };
   }
 
-  const chain = Object.values(chains).find(chain => chain.id === chainId);
-  if (!chain) {
-    return { error: "Invalid chainId" };
-  }
-
   const privy = new PrivyClient(PRIVY_ID, PRIVY_SECRET);
   const publicClient = createPublicClient({
-    chain,
+    chain: scrollSepolia,
     transport: http(),
   });
 
-  console.log("PUBLIC CLIENT", { chainId, chain, privy, publicClient });
+  console.log("PUBLIC CLIENT", { chainId, chain: scrollSepolia, privy, publicClient });
 
-  const { abi, address: visibilityCreditsAddress } = ({} as any)?.[chainId].VisibilityCredits || {};
+  const { abi, address: visibilityCreditsAddress } = deployedContracts[chainId].VisibilityCredits || {};
   if (!abi || !visibilityCreditsAddress) {
     return { error: "No smart contract data found" };
   }
@@ -52,11 +46,11 @@ export async function link(username: string) {
       abi,
       functionName: "getVisibility", // Replace with the actual function name in your contract
       args: [visibilityId], // Add arguments if the function requires them
-    }) as Promise<string[]>,
+    }) as unknown as Promise<string[]>,
     privy.getUserByTwitterUsername(username),
   ]);
 
-  console.log("VISIBILITY DATA", { visibilityData, user });
+  console.log("VISIBILITY DATA", { visibilityData, user, username });
 
   if (user && user?.wallet?.address) {
     const privyUserAddr = user.wallet.address;
@@ -68,21 +62,19 @@ export async function link(username: string) {
     }
 
     const walletClient = createWalletClient({
-      chain,
+      chain: scrollSepolia,
       transport: http(),
       account: privateKeyToAccount(LINKER_PRIVATE_KEY as `0x-${string}`),
     });
 
     console.log("WALLET CLIENT", { walletClient });
 
-    const args = [visibilityId, getAddress(privyUserAddr)];
-
     try {
       const txHash = await walletClient.writeContract({
         address: visibilityCreditsAddress,
         abi,
         functionName: "setCreatorVisibility",
-        args,
+        args: [visibilityId, getAddress(privyUserAddr)],
       });
 
       return { msg: "User address set", visibilityId, privyUserAddr, txHash };
@@ -91,7 +83,6 @@ export async function link(username: string) {
         msg: "Error when trying to set user address set",
         address: visibilityCreditsAddress,
         functionName: "setCreatorVisibility",
-        args,
         visibilityId,
         privyUserAddr,
         error,

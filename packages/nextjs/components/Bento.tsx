@@ -7,7 +7,7 @@ import { queryOptions, useQuery } from "@tanstack/react-query";
 import { Link, Share2 } from "lucide-react";
 import { encodeFunctionData, formatEther } from "viem";
 import { create } from "zustand";
-// import { link } from "@/app/actions";
+import { link } from "@/app/actions";
 import { ChartComponent } from "@/components/Chart";
 import { chain } from "@/components/Providers";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -50,12 +50,14 @@ export default function Bento({ username }: { username: string }) {
       console.log("creator", creator);
       console.log("user", user.wallet?.address);
 
-      if (creator !== user.wallet?.address) return;
+      if (creator === user.wallet?.address) return;
 
       try {
-        // const result = await link(username);
-        console.log("result", "????");
-      } catch (error) {}
+        const result = await link(username);
+        console.log("result", result);
+      } catch (error) {
+        console.error("Error linking", error);
+      }
     });
   }, [user]);
 
