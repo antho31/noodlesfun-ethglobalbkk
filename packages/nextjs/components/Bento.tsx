@@ -18,23 +18,6 @@ import { Textarea } from "@/components/ui/textarea";
 import deployedContracts from "@/contracts/deployedContracts";
 import { getBuyPrice, getSellPrice, getSharesCount, getVisibilityData, getWalletBalance } from "@/lib/web3";
 
-type Store = {
-  activity: {
-    address: string;
-    type: "buy" | "sell";
-    price: number;
-    amount: number;
-    timeAgo: string;
-    link: string;
-  }[];
-  pushActivity: (activity: Store["activity"][0]) => void;
-};
-
-const useStore = create<Store>()(set => ({
-  activity: [],
-  pushActivity: (activity: Store["activity"][0]) => set(state => ({ activity: [...state.activity, activity] })),
-}));
-
 export default function Bento({ username }: { username: string }) {
   const [mode, setMode] = useState<"buy" | "sell">("buy");
   const [amount, setAmount] = useState("");
@@ -46,8 +29,6 @@ export default function Bento({ username }: { username: string }) {
   const [maxSellAmount, setMaxSellAmount] = useState(1); // Simulated max amount to sell
   const [tweetContent, setTweetContent] = useState("");
   const [tweetUrl, setTweetUrl] = useState("");
-
-  const { activity, pushActivity } = useStore();
 
   const visibilityId = `x-${username}`;
 
@@ -75,7 +56,19 @@ export default function Bento({ username }: { username: string }) {
           value: Number(formatEther(trade.tradeEvent_newCurrentPrice)),
         };
       });
-      return { tradeData };
+      const activityData = data.data.visibility.trades
+        .map((trade: any) => {
+          return {
+            address: trade.tradeEvent_from,
+            type: trade.tradeEvent_isBuy ? "buy" : "sell",
+            price: Number(formatEther(trade.tradeEvent_tradeCost)),
+            amount: Number(trade.tradeEvent_amount),
+            timeAgo: new Date(Number(trade.blockTimestamp) * 1000).toLocaleString(),
+            link: `https://sepolia.scrollscan.com/tx/${trade.transactionHash}`,
+          };
+        })
+        .reverse();
+      return { tradeData, activityData };
     },
   });
 
@@ -99,7 +92,7 @@ export default function Bento({ username }: { username: string }) {
 
     const writeData = encodeFunctionData({
       // @ts-ignore
-      abi: deployedContracts[chain.id].VisibilityCredits.abi,
+      abi: deployedContracts[534351].VisibilityCredits.abi,
       functionName: "buyCredits",
       args: [`x-${username}`, BigInt(amount), "0x0000000000000000000000000000000000000000"],
     });
@@ -107,7 +100,7 @@ export default function Bento({ username }: { username: string }) {
     const price = await getBuyPrice(`x-${username}`, BigInt(amount));
     const transactionRequest = {
       // @ts-ignore
-      to: deployedContracts[chain.id].VisibilityCredits.address,
+      to: deployedContracts[534351].VisibilityCredits.address,
       data: writeData,
       value: BigInt(price),
     };
@@ -120,14 +113,7 @@ export default function Bento({ username }: { username: string }) {
 
       console.log("TRANSACTION HASH", transactionHash);
 
-      pushActivity({
-        address: user.wallet.address,
-        type: "buy",
-        price: Number(formatEther(price)),
-        amount: Number(amount),
-        timeAgo: new Date().toLocaleString(),
-        link: `https://sepolia.scrollscan.com/tx/${transactionHash}`,
-      });
+      visibilityQuery.refetch();
     } catch (error) {
       console.error("Error sending transaction:", error);
     }
@@ -153,14 +139,14 @@ export default function Bento({ username }: { username: string }) {
     const price = await getSellPrice(`x-${username}`, BigInt(amount));
     const writeData = encodeFunctionData({
       // @ts-ignore
-      abi: deployedContracts[chain.id].VisibilityCredits.abi,
+      abi: deployedContracts[534351].VisibilityCredits.abi,
       functionName: "sellCredits",
       args: [`x-${username}`, BigInt(amount), "0x0000000000000000000000000000000000000000"],
     });
 
     const transactionRequest = {
       // @ts-ignore
-      to: deployedContracts[chain.id].VisibilityCredits.address,
+      to: deployedContracts[534351].VisibilityCredits.address,
       data: writeData,
     };
 
@@ -172,14 +158,7 @@ export default function Bento({ username }: { username: string }) {
 
       console.log("TRANSACTION HASH", transactionHash);
 
-      pushActivity({
-        address: user.wallet.address,
-        type: "sell",
-        price: Number(formatEther(price)),
-        amount: Number(amount),
-        timeAgo: new Date().toLocaleString(),
-        link: `https://sepolia.scrollscan.com/tx/${transactionHash}`,
-      });
+      visibilityQuery.refetch();
     } catch (error) {
       console.error("Error sending transaction:", error);
     }
@@ -242,7 +221,7 @@ export default function Bento({ username }: { username: string }) {
             <h2 className="mb-2 text-lg font-semibold">Trade</h2>
             <h2 className="mb-2 font-semibold text-md">
               {userBalanceQuery.status === "pending"
-                ? "Loading..."
+                ? ""
                 : userBalanceQuery.status === "error"
                   ? "Error"
                   : mode === "buy"
@@ -393,15 +372,15 @@ export default function Bento({ username }: { username: string }) {
                   <TableRow>
                     <TableHead>User</TableHead>
                     <TableHead>Type</TableHead>
-                    <TableHead>Price (ETH)</TableHead>
                     <TableHead>Amount</TableHead>
+                    <TableHead>Qty</TableHead>
                     <TableHead>Time</TableHead>
                     <TableHead>View tx</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {/* TODO: ACTIVITY FROM GRAPHQL AND NOT LOCAL */}
-                  {activity.map((item, index) => (
+                  {/* @ts-ignore */}
+                  {visibilityQuery?.data?.activityData?.map((item, index) => (
                     <TableRow key={index}>
                       <TableCell className="flex items-center space-x-2">
                         <Avatar>
@@ -413,7 +392,7 @@ export default function Bento({ username }: { username: string }) {
                       <TableCell className={item.type === "buy" ? "text-green-500" : "text-red-500"}>
                         {item.type}
                       </TableCell>
-                      <TableCell>${item.price.toLocaleString()}</TableCell>
+                      <TableCell>{item.price.toLocaleString()} ETH</TableCell>
                       <TableCell>{item.amount}</TableCell>
                       <TableCell>{item.timeAgo}</TableCell>
                       <TableCell>

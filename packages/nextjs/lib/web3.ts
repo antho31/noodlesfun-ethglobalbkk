@@ -82,9 +82,9 @@ export async function getWalletBalance(walletAddress: string) {
 export async function getSharesCount(visibilityId: string, account: string) {
   const data = await publicClient.readContract({
     // @ts-ignore
-    address: deployedContracts[chain.id].VisibilityCredits.address,
+    address: deployedContracts[534351].VisibilityCredits.address,
     // @ts-ignore
-    abi: deployedContracts[chain.id].VisibilityCredits.abi,
+    abi: deployedContracts[534351].VisibilityCredits.abi,
     functionName: "getVisibilityCreditBalance",
     args: [visibilityId, account as Hash],
   });
@@ -99,9 +99,9 @@ export async function getBuyPrice(
 ) {
   const data = await publicClient.readContract({
     // @ts-ignore
-    address: deployedContracts[chain.id].VisibilityCredits.address,
+    address: deployedContracts[534351].VisibilityCredits.address,
     // @ts-ignore
-    abi: deployedContracts[chain.id].VisibilityCredits.abi,
+    abi: deployedContracts[534351].VisibilityCredits.abi,
     functionName: "buyCostWithFees",
     args: [token, amount, referer],
   });
@@ -116,9 +116,9 @@ export async function getSellPrice(
 ) {
   const data = await publicClient.readContract({
     // @ts-ignore
-    address: deployedContracts[chain.id].VisibilityCredits.address,
+    address: deployedContracts[534351].VisibilityCredits.address,
     // @ts-ignore
-    abi: deployedContracts[chain.id].VisibilityCredits.abi,
+    abi: deployedContracts[534351].VisibilityCredits.abi,
     functionName: "sellCostWithFees",
     args: [token, amount, referer],
   });
@@ -129,9 +129,9 @@ export async function getSellPrice(
 export async function getVisibility(token: string) {
   const data = await publicClient.readContract({
     // @ts-ignore
-    address: deployedContracts[chain.id].VisibilityCredits.address,
+    address: deployedContracts[534351].VisibilityCredits.address,
     // @ts-ignore
-    abi: deployedContracts[chain.id].VisibilityCredits.abi,
+    abi: deployedContracts[534351].VisibilityCredits.abi,
     functionName: "getVisibility",
     args: [token],
   });
@@ -142,9 +142,9 @@ export async function getVisibility(token: string) {
 export async function getCurrentPrice(token: string) {
   const data = await publicClient.readContract({
     // @ts-ignore
-    address: deployedContracts[chain.id].VisibilityCredits.address,
+    address: deployedContracts[534351].VisibilityCredits.address,
     // @ts-ignore
-    abi: deployedContracts[chain.id].VisibilityCredits.abi,
+    abi: deployedContracts[534351].VisibilityCredits.abi,
     functionName: "getVisibilityCurrentPrice",
     args: [token],
   });

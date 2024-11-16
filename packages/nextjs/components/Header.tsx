@@ -81,7 +81,7 @@ export const Header = () => {
 
           <div className="gap-2 pl-3 md:flex">
             <span className="items-center justify-between hidden text-purple-400 md:flex">
-              {Number(balance).toPrecision(5)} ETH
+              {balance !== null && `${Number(balance).toPrecision(5)} ETH`}
             </span>
             {!ready || loading ? (
               <Button disabled onClick={handleInitOAuth} className="cursor-pointer text-bold bg-card">
