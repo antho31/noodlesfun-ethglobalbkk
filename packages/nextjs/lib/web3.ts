@@ -1,4 +1,4 @@
-import { createPublicClient, formatEther, http } from "viem";
+import { Hash, createPublicClient, formatEther, getAddress, http } from "viem";
 import { chain } from "@/components/Providers";
 import deployedContracts from "@/contracts/deployedContracts";
 
@@ -7,24 +7,49 @@ const publicClient = createPublicClient({
   transport: http(),
 });
 
-async function getWalletBalance(walletAddress: string) {
+export async function getWalletBalance(walletAddress: string) {
   const balance = await publicClient.getBalance({ address: walletAddress });
 
   return formatEther(balance);
 }
 
-async function getBuyPrice(
+export async function getSharesCount(visibilityId: string, account: string) {
+  const data = await publicClient.readContract({
+    address: deployedContracts[chain.id].VisibilityCredits.address,
+    abi: deployedContracts[chain.id].VisibilityCredits.abi,
+    functionName: "getVisibilityCreditBalance",
+    args: [visibilityId, account as Hash],
+  });
+
+  return data;
+}
+
+export async function getBuyPrice(
   token: string,
   amount: bigint,
   referer: string = "0x0000000000000000000000000000000000000000",
 ) {
-  const data = publicClient.readContract({
+  const data = await publicClient.readContract({
     address: deployedContracts[chain.id].VisibilityCredits.address,
     abi: deployedContracts[chain.id].VisibilityCredits.abi,
-    // @ts-ignore
-    method: "buyCostWithFees",
+    functionName: "buyCostWithFees",
     args: [token, amount, referer],
   });
+
+  return data[0];
 }
 
-export { getWalletBalance };
+export async function getSellPrice(
+  token: string,
+  amount: bigint,
+  referer: string = "0x0000000000000000000000000000000000000000",
+) {
+  const data = await publicClient.readContract({
+    address: deployedContracts[chain.id].VisibilityCredits.address,
+    abi: deployedContracts[chain.id].VisibilityCredits.abi,
+    functionName: "sellCostWithFees",
+    args: [token, amount, referer],
+  });
+
+  return data[0];
+}

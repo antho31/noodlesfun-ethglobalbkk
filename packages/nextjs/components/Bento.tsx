@@ -7,6 +7,8 @@ import { Select } from "@radix-ui/react-select";
 import axios from "axios";
 import { Camera, Link, Share2, TrendingUp } from "lucide-react";
 import { createPublicClient, createWalletClient, custom, encodeFunctionData, http } from "viem";
+import { bigint } from "zod";
+import { create } from "zustand";
 // import { VisibilityCreditsABI } from "@/abis/VisibilityCredits";
 import { ChartComponent } from "@/components/Chart";
 import { chain } from "@/components/Providers";
@@ -17,8 +19,8 @@ import { SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/compone
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-
-// import useGraph from "@/lib/fetch";
+import deployedContracts from "@/contracts/deployedContracts";
+import { getBuyPrice, getSellPrice, getSharesCount, getWalletBalance } from "@/lib/web3";
 
 // Mock data for activity
 const useGraph = (username: string, address: string) => {
@@ -96,10 +98,28 @@ const initialData = [
   { time: "2019-01-01", value: 33.67 },
 ];
 
-export default function Bento() {
+type Store = {
+  activity: {
+    address: string;
+    type: "buy" | "sell";
+    price: number;
+    amount: number;
+    timeAgo: string;
+    link: string;
+  }[];
+  pushActivity: (activity: Store["activity"][0]) => void;
+};
+
+const useStore = create<Store>()(set => ({
+  activity: [],
+  pushActivity: (activity: Store["activity"][0]) => set(state => ({ activity: [...state.activity, activity] })),
+}));
+
+export default function Bento({ username }: { username: string }) {
   const [mode, setMode] = useState<"buy" | "sell">("buy");
   const [amount, setAmount] = useState("");
-
+  const [balance, setBalance] = useState<string | null>(null);
+  const [tokens, setTokens] = useState<bigint>(BigInt(0));
   const { wallets } = useWallets();
   const { user } = usePrivy();
   const { data, mutate } = useGraph(user?.twitter?.username ?? "", user?.wallet?.address ?? "");
@@ -108,8 +128,110 @@ export default function Bento() {
   const [tweetContent, setTweetContent] = useState("");
   const [tweetUrl, setTweetUrl] = useState("");
 
+  const { activity, pushActivity } = useStore();
+
+  useEffect(() => {
+    async function init() {
+      if (user && user.wallet) {
+        const balance = await getWalletBalance(user.wallet.address);
+        const tokens_data = await getSharesCount(`x-${username}`, user.wallet.address);
+        setBalance(balance);
+        setTokens(tokens_data);
+      }
+    }
+
+    init();
+  }, [user, username]);
+
   const handleReset = () => {
     setAmount("");
+  };
+
+  const handleBuy = async () => {
+    if (!user || !user?.wallet) {
+      console.log("No wallet found");
+      return;
+    }
+
+    const wallet = wallets[0]; // Replace this with your desired wallet
+    await wallet.switchChain(chain.id);
+    const provider = await wallet.getEthereumProvider();
+
+    const writeData = encodeFunctionData({
+      abi: deployedContracts[chain.id].VisibilityCredits.abi,
+      functionName: "buyCredits",
+      args: [`x-${username}`, BigInt(amount), "0x0000000000000000000000000000000000000000"],
+    });
+
+    const price = await getBuyPrice(`x-${username}`, BigInt(amount));
+    const transactionRequest = {
+      to: deployedContracts[chain.id].VisibilityCredits.address,
+      data: writeData,
+      value: BigInt(price),
+    };
+
+    try {
+      const transactionHash = await provider.request({
+        method: "eth_sendTransaction",
+        params: [transactionRequest],
+      });
+
+      console.log("TRANSACTION HASH", transactionHash);
+
+      pushActivity({
+        address: user.wallet.address,
+        type: "buy",
+        price: Number(price),
+        amount: Number(amount),
+        timeAgo: new Date().toLocaleString(),
+        link: `https://neon-devnet.blockscout.com/tx/${transactionHash}`,
+      });
+    } catch (error) {
+      console.error("Error sending transaction:", error);
+    }
+  };
+
+  const handleSell = async () => {
+    if (!user || !user?.wallet) {
+      console.log("No wallet found");
+      return;
+    }
+
+    const wallet = wallets[0]; // Replace this with your desired wallet
+    await wallet.switchChain(chain.id);
+    const provider = await wallet.getEthereumProvider();
+
+    const price = await getSellPrice(`x-${username}`, BigInt(amount));
+    const writeData = encodeFunctionData({
+      abi: deployedContracts[chain.id].VisibilityCredits.abi,
+      functionName: "sellCredits",
+      args: [`x-${username}`, BigInt(amount), "0x0000000000000000000000000000000000000000"],
+    });
+
+    const transactionRequest = {
+      to: deployedContracts[chain.id].VisibilityCredits.address,
+      data: writeData,
+    };
+
+    try {
+      const transactionHash = await provider.request({
+        method: "eth_sendTransaction",
+        params: [transactionRequest],
+      });
+
+      console.log("TRANSACTION HASH", transactionHash);
+
+      pushActivity({
+        address: user.wallet.address,
+        type: "sell",
+        price: Number(price),
+        amount: Number(amount),
+        timeAgo: new Date().toLocaleString(),
+        link: `https://neon-devnet.blockscout.com/tx/${transactionHash}`,
+      });
+    } catch (error) {
+      console.error("Error sending transaction:", error);
+    }
   };
 
   const handleQuickBuy = (value: number) => {
@@ -224,7 +346,10 @@ export default function Bento() {
         <div className="p-4 rounded-lg shadow-lg bg-card text-card-foreground">
           <div className="flex items-center justify-between">
             <h2 className="mb-2 text-lg font-semibold">Trade</h2>
-            <h2 className="mb-2 font-semibold text-md">0.5 ETH</h2>
+            <h2 className="mb-2 font-semibold text-md">
+              {/* {balance} NEON | {tokens?.toString()} Tokens */}
+              {mode === "buy" ? `${Number(balance ?? 0).toFixed(5)} NEON` : `${tokens?.toString()} x-${username}`}
+            </h2>
           </div>
           <Tabs defaultValue="buy" onValueChange={value => setMode(value as "buy" | "sell")}>
             <TabsList className="grid w-full grid-cols-2">
@@ -262,10 +387,7 @@ export default function Bento() {
                     25
                   </Button>
                 </div>
-                <Button
-                  className="w-full bg-green-500 hover:bg-green-600"
-                  //   onClick={handleBuy}
-                >
+                <Button className="w-full bg-green-500 hover:bg-green-600" onClick={handleBuy}>
                   Buy
                 </Button>
                 <p className="text-sm text-muted-foreground">
@@ -304,11 +426,7 @@ export default function Bento() {
                     100%
                   </Button>
                 </div>
-                <Button
-                  className="w-full"
-                  variant="destructive"
-                  //   onClick={handleSell}
-                >
+                <Button className="w-full" variant="destructive" onClick={handleSell}>
                   Sell
                 </Button>
                 <p className="text-sm text-muted-foreground">
@@ -339,14 +457,14 @@ export default function Bento() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {activityData.map((item, index) => (
+                  {activity.map((item, index) => (
                     <TableRow key={index}>
                       <TableCell className="flex items-center space-x-2">
                         <Avatar>
-                          <AvatarImage src={item.user} alt={item.user} />
-                          <AvatarFallback>{item.user[0]}</AvatarFallback>
+                          <AvatarImage src={item.address} alt={item.address} />
+                          <AvatarFallback>{item.address[0]}</AvatarFallback>
                         </Avatar>
-                        <span>@{item.user}</span>
+                        <span>{item.address}</span>
                       </TableCell>
                       <TableCell className={item.type === "buy" ? "text-green-500" : "text-red-500"}>
                         {item.type}
@@ -355,7 +473,9 @@ export default function Bento() {
                       <TableCell>{item.amount}</TableCell>
                       <TableCell>{item.timeAgo}</TableCell>
                       <TableCell>
-                        <Link />
+                        <a href={item.link} target="_blank" rel="noreferrer noopener">
+                          <Link />
+                        </a>
                       </TableCell>
                     </TableRow>
                   ))}

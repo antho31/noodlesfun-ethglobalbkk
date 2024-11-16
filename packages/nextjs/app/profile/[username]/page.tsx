@@ -60,7 +60,7 @@ export default async function Profile({ params }: { params: { username: string }
             },
           ]}
         />
-        <Bento />
+        <Bento username={username} />
       </div>
     </>
   );
