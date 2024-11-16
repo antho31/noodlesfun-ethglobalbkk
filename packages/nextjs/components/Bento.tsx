@@ -7,6 +7,7 @@ import { queryOptions, useQuery } from "@tanstack/react-query";
 import { Link, Share2 } from "lucide-react";
 import { encodeFunctionData, formatEther } from "viem";
 import { create } from "zustand";
+// import { link } from "@/app/actions";
 import { ChartComponent } from "@/components/Chart";
 import { chain } from "@/components/Providers";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -16,7 +17,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import deployedContracts from "@/contracts/deployedContracts";
-import { getBuyPrice, getSellPrice, getSharesCount, getVisibilityData, getWalletBalance } from "@/lib/web3";
+import {
+  getBuyPrice,
+  getSellPrice,
+  getSharesCount,
+  getVisibility,
+  getVisibilityData,
+  getWalletBalance,
+} from "@/lib/web3";
 
 export default function Bento({ username }: { username: string }) {
   const [mode, setMode] = useState<"buy" | "sell">("buy");
@@ -31,6 +39,25 @@ export default function Bento({ username }: { username: string }) {
   const [tweetUrl, setTweetUrl] = useState("");
 
   const visibilityId = `x-${username}`;
+
+  useEffect(() => {
+    if (!user) return;
+
+    if (user.twitter?.username !== username) return;
+
+    getVisibility(`x-${username}`).then(async visibility => {
+      const creator = visibility[0];
+      console.log("creator", creator);
+      console.log("user", user.wallet?.address);
+
+      if (creator !== user.wallet?.address) return;
+
+      try {
+        // const result = await link(username);
+        console.log("result", "????");
+      } catch (error) {}
+    });
+  }, [user]);
 
   /*
     useEffect(() => {

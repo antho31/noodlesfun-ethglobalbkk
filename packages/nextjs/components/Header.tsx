@@ -45,7 +45,7 @@ export const Header = () => {
     }
 
     init();
-  }, [user, createWallet]);
+  }, [user]);
 
   return (
     <header className="sticky border-b-[1px] top-0 z-40 w-full bg-white dark:border-b-card dark:bg-background">
