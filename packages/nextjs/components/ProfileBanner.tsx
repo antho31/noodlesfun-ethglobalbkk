@@ -1,5 +1,11 @@
+"use client";
+
 /* eslint-disable @next/next/no-img-element */
+import { use, useEffect, useState } from "react";
+import { usePrivy } from "@privy-io/react-auth";
+import { formatEther, parseEther } from "viem";
 import { Button } from "@/components/ui/button";
+import { getVisibility } from "@/lib/web3";
 
 interface Stat {
   label: string;
@@ -29,6 +35,17 @@ export default function ProfileBanner({
     { label: "24h Volume", value: "$32B" },
   ],
 }: ProfileBannerProps) {
+  const [claim, setClaim] = useState<string>("0");
+  const { user } = usePrivy();
+
+  useEffect(() => {
+    if (user?.wallet?.address) {
+      getVisibility(`x-${handle}`).then(visibility => {
+        setClaim(formatEther(visibility[2]));
+      });
+    }
+  }, [user]);
+
   return (
     <div className="w-full mx-auto mt-4">
       <div className="relative">
@@ -55,7 +72,19 @@ export default function ProfileBanner({
         </div>
         <div className="flex items-center justify-between">
           <p className="mt-2 text-foreground">{description}</p>
-          <Button className="bg-green-500 hover:bg-green-600">Claim 50 ETH</Button>
+
+          {user && user.twitter?.username === handle && user.wallet?.address && (
+            <Button
+              className="bg-green-500 hover:bg-green-600"
+              onClick={() => {
+                if (!user?.wallet?.address) return;
+
+                //  TODO: LOGIC HERE TO CLAIM ETH
+              }}
+            >
+              Claim {claim} ETH
+            </Button>
+          )}
         </div>
       </div>
 
