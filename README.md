@@ -25,16 +25,16 @@
 
 Powers creator tokens using the bonding curve formula: `Price = A × Supply² + B × Supply + BasePrice`. As token supply increases, the price grows exponentially, rewarding early supporters.
 
-- Neon EVM Devnet: `0xF39Cc5a1f1adA029de8C7F18D4687B438dEa45a2`
-  ([Blockscout link](https://neon-devnet.blockscout.com/address/0xF39Cc5a1f1adA029de8C7F18D4687B438dEa45a2#code))
+- Neon EVM Devnet: `0x94F7b08E014D01a48E05c81e34a103294475D675`
+  ([Blockscout link](https://neon-devnet.blockscout.com/address/0x94F7b08E014D01a48E05c81e34a103294475D675#code))
 - Scroll Sepolia: `0x6C865dca5a9777C004Afb14E5F0aC2ddE403C7f8` ([Scrollscan link](https://sepolia.scrollscan.com/address/0x6C865dca5a9777C004Afb14E5F0aC2ddE403C7f8#code))
 
 #### VisibilityServices
 
 Allows creators to accept tokens for off-chain promotion services.
 
-- Neon EVM Devnet: `0x00f463f093C66F2F0320237ca8766C536cf02972`
-  ([Blockscout link](https://neon-devnet.blockscout.com/address/0x00f463f093C66F2F0320237ca8766C536cf02972#code))
+- Neon EVM Devnet: `0x20ed669527179c08D8B40CBA1Ec51bA39e2e2cAc`
+  ([Blockscout link](https://neon-devnet.blockscout.com/address/0x20ed669527179c08D8B40CBA1Ec51bA39e2e2cAc#code))
 - Scroll Sepolia: `0xA5a103ac4aC7298D02CCA272a8CEFb6f7B047e31` ([Scrollscan link](https://sepolia.scrollscan.com/address/0xA5a103ac4aC7298D02CCA272a8CEFb6f7B047e31#code))  
 
 #### Subgraphs

@@ -39,6 +39,7 @@ const deployment: DeployFunction = async function (hre: HardhatRuntimeEnvironmen
   });
 
   const visibilityCredits = await hre.ethers.getContract<Contract>("VisibilityCredits", deployer);
+  await visibilityCredits.waitForDeployment();
 
   const visibilityCreditsAddress = await visibilityCredits.getAddress();
   //   "0x8209a3aE55404AD1C7a976Df37de3c53e56Bd4bE";
@@ -52,11 +53,13 @@ const deployment: DeployFunction = async function (hre: HardhatRuntimeEnvironmen
   });
 
   const visibilityServices = await hre.ethers.getContract<Contract>("VisibilityServices", deployer);
+  await visibilityServices.waitForDeployment();
 
   const visibilityServicesAddress = await visibilityServices.getAddress();
   console.log("VisibilityServices deployed to:", visibilityServicesAddress);
 
-  await visibilityCredits.grantCreatorTransferRole(visibilityServicesAddress);
+  const tx = await visibilityCredits.grantCreatorTransferRole(visibilityServicesAddress);
+  await tx.wait();
   console.log("CreatorTransferRole granted to:", visibilityServicesAddress);
 
   await hre.run("verify:verify", {
