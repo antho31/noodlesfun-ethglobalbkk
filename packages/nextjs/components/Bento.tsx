@@ -88,7 +88,7 @@ export default function Bento({ username }: { username: string }) {
         // { time: "2018-12-22", value: 32.51 },
         return {
           time: Number(trade.blockTimestamp),
-          value: Number(formatEther(trade.tradeEvent_newCurrentPrice)),
+          value: Number(formatEther(trade.tradeEvent_newCurrentPrice)) * 3100,
         };
       });
       const activityData = data.data.visibility.trades
@@ -105,6 +105,7 @@ export default function Bento({ username }: { username: string }) {
         .reverse();
       return { tradeData, activityData };
     },
+    refetchInterval: 1000,
   });
 
   const handleReset = () => {
