@@ -52,4 +52,4 @@ Visit [noodles.fun](https://noodles.fun) to start trading and supporting your fa
 
 ---
 
-Built with love and innovation for EthGlobal Bangkok 🌏✨
+Built with love and innovation for EthGlobal Bangkok 🌏✨🍜
