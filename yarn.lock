@@ -4592,6 +4592,7 @@ __metadata:
     "@trivago/prettier-plugin-sort-imports": ^4.3.0
     "@types/node": ^18.19.50
     "@types/react": ^18.3.5
+    "@uidotdev/usehooks": ^2.4.1
     "@uniswap/sdk-core": ^5.8.2
     "@uniswap/v2-sdk": ^4.6.1
     abitype: 1.0.6
@@ -5755,6 +5756,16 @@ __metadata:
     "@typescript-eslint/types": 8.8.1
     eslint-visitor-keys: ^3.4.3
   checksum: c5861ae79fb3f190e7882dcdf7735799249c73804f0e52e2ac5a5000bc33cbc44c4e3a0800db7aa8d5ee5c43393495eec7a7c7c963ceafc122e8472b479b32f5
+  languageName: node
+  linkType: hard
+
+"@uidotdev/usehooks@npm:^2.4.1":
+  version: 2.4.1
+  resolution: "@uidotdev/usehooks@npm:2.4.1"
+  peerDependencies:
+    react: ">=18.0.0"
+    react-dom: ">=18.0.0"
+  checksum: d381ce7d4853abe53127b70b0734935d1cfba97bfd2314e67aa42d4f35cd5b955712c6e968f435d8818bd51bea9cf7688b60eeb0db19bae2a6666a37ceee8b5f
   languageName: node
   linkType: hard
 

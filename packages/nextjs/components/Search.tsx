@@ -1,4 +1,8 @@
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { useDebounce } from "@uidotdev/usehooks";
 import { Calculator, Calendar, CreditCard, Settings, Smile, User } from "lucide-react";
 import {
   Command,
@@ -12,9 +16,53 @@ import {
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
 
+const autocomplete = [
+  {
+    handle: "noodlesdotfun",
+    img: "https://pbs.twimg.com/profile_images/1857646465558134784/WAd2HZ-6_400x400.png",
+  },
+  {
+    handle: "VitalikButerin",
+    img: "https://pbs.twimg.com/profile_images/1748153260203229184/sXJIGMBk_400x400.jpg",
+  },
+  {
+    handle: "elonmusk",
+    img: "https://pbs.twimg.com/profile_images/1849727333617573888/HBgPUrjG_400x400.jpg",
+  },
+];
+
 export const SearchBar = ({ className }: { className?: string }) => {
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
+  //   const [query, setQuery] = useState("");
+  //   const debouncedQuery = useDebounce(query, 100);
+
+  //   const { data, error, status } = useQuery({
+  //     queryKey: ["search", debouncedQuery],
+  //     queryFn: async () => {
+  //       const res = await fetch(`/api/profile/${debouncedQuery}`, {
+  //         cache: "force-cache",
+  //         next: {
+  //           revalidate: 60 * 60 * 24,
+  //         },
+  //       }).then(res => res.json());
+
+  //       console.log(res);
+
+  //       return res;
+  //     },
+  //     enabled: !!debouncedQuery,
+  //   });
+
+  //   useEffect(() => {
+  //     const onInput = async () => {
+  //       setQuery(inputRef.current?.value || "");
+  //     };
+
+  //     inputRef.current?.addEventListener("change", onInput);
+  //     return () => inputRef.current?.removeEventListener("change", onInput);
+  //   }, [open]);
 
   // Toggle the menu when ⌘K is pressed
   useEffect(() => {
@@ -50,39 +98,21 @@ export const SearchBar = ({ className }: { className?: string }) => {
       />
       {open && (
         <CommandList className="absolute w-full mt-0 rounded-md shadow-md outline-none top-12 bg-card animate-in fade-in-0 zoom-in-95">
-          <CommandEmpty>No results found.</CommandEmpty>
+          <CommandEmpty>Search for query</CommandEmpty>
           <CommandGroup heading="Trending">
-            <CommandItem>
-              <Calendar className="w-4 h-4 mr-2" />
-              <span>Calendar</span>
-            </CommandItem>
-            <CommandItem>
-              <Smile className="w-4 h-4 mr-2" />
-              <span>Search Emoji</span>
-            </CommandItem>
-            <CommandItem>
-              <Calculator className="w-4 h-4 mr-2" />
-              <span>Calculator</span>
-            </CommandItem>
+            {autocomplete.map(item => (
+              <CommandItem
+                key={item.handle}
+                onSelect={() => {
+                  router.push(`/profile/${item.handle}`);
+                  inputRef.current?.blur();
+                }}
+              >
+                <Image src={item.img} className="w-6 h-6 mr-2 rounded-full" alt={item.handle} width={24} height={24} />
+                <span>{item.handle}</span>
+              </CommandItem>
+            ))}
           </CommandGroup>
-          {/* <CommandSeparator />
-                    <CommandGroup heading="Settings">
-                        <CommandItem>
-                            <User className="w-4 h-4 mr-2" />
-                            <span>Profile</span>
-                            <CommandShortcut>⌘P</CommandShortcut>
-                        </CommandItem>
-                        <CommandItem>
-                            <CreditCard className="w-4 h-4 mr-2" />
-                            <span>Billing</span>
-                            <CommandShortcut>⌘B</CommandShortcut>
-                        </CommandItem>
-                        <CommandItem>
-                            <Settings className="w-4 h-4 mr-2" />
-                            <span>Settings</span>
-                            <CommandShortcut>⌘S</CommandShortcut>
-                        </CommandItem>
-                    </CommandGroup> */}
         </CommandList>
       )}
     </Command>

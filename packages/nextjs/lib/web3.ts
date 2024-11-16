@@ -59,3 +59,29 @@ export async function getSellPrice(
 
   return data[0];
 }
+
+export async function getVisibility(token: string) {
+  const data = await publicClient.readContract({
+    // @ts-ignore
+    address: deployedContracts[chain.id].VisibilityCredits.address,
+    // @ts-ignore
+    abi: deployedContracts[chain.id].VisibilityCredits.abi,
+    functionName: "getVisibility",
+    args: [token],
+  });
+
+  return data; // creator, supply, claimable fee balance
+}
+
+export async function getCurrentPrice(token: string) {
+  const data = await publicClient.readContract({
+    // @ts-ignore
+    address: deployedContracts[chain.id].VisibilityCredits.address,
+    // @ts-ignore
+    abi: deployedContracts[chain.id].VisibilityCredits.abi,
+    functionName: "getVisibilityCurrentPrice",
+    args: [token],
+  });
+
+  return data; // wei
+}

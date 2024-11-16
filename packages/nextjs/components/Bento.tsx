@@ -1,102 +1,22 @@
 "use client";
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useEffect, useMemo, useState } from "react";
-import { useFundWallet, useLoginWithOAuth, usePrivy, useWallets } from "@privy-io/react-auth";
-import { Select } from "@radix-ui/react-select";
-import axios from "axios";
-import { Camera, Link, Share2, TrendingUp } from "lucide-react";
-import { createPublicClient, createWalletClient, custom, encodeFunctionData, http } from "viem";
-import { bigint } from "zod";
+import React, { useState } from "react";
+import { usePrivy, useWallets } from "@privy-io/react-auth";
+import { useQuery } from "@tanstack/react-query";
+import { Link, Share2 } from "lucide-react";
+import { encodeFunctionData, formatEther } from "viem";
 import { create } from "zustand";
-// import { VisibilityCreditsABI } from "@/abis/VisibilityCredits";
 import { ChartComponent } from "@/components/Chart";
 import { chain } from "@/components/Providers";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import deployedContracts from "@/contracts/deployedContracts";
 import { getBuyPrice, getSellPrice, getSharesCount, getWalletBalance } from "@/lib/web3";
-
-// Mock data for activity
-const useGraph = (username: string, address: string) => {
-  return {
-    data: {
-      creditsTrades: [],
-      visibility: {
-        totalSupply: 100,
-        balances: [],
-      },
-      porfolio: [],
-    },
-    mutate: () => {},
-  };
-};
-
-// Mock data for activity
-const activityData = [
-  {
-    user: "alice",
-    type: "buy",
-    price: 50000,
-    amount: 0.5,
-    timeAgo: "5 minutes ago",
-  },
-  {
-    user: "bob",
-    type: "sell",
-    price: 49800,
-    amount: 0.3,
-    timeAgo: "10 minutes ago",
-  },
-  {
-    user: "charlie",
-    type: "buy",
-    price: 50100,
-    amount: 0.7,
-    timeAgo: "15 minutes ago",
-  },
-];
-
-// Mock data for top holders
-const topHoldersData = [
-  {
-    username: "crypto_whale",
-    avatar: "https://github.com/shadcn.png",
-    balance: 100,
-    percentage: 10,
-  },
-  {
-    username: "hodler123",
-    avatar: "https://github.com/shadcn.png",
-    balance: 75,
-    percentage: 7.5,
-  },
-  {
-    username: "to_the_moon",
-    avatar: "https://github.com/shadcn.png",
-    balance: 50,
-    percentage: 5,
-  },
-];
-
-const initialData = [
-  { time: "2018-12-22", value: 32.51 },
-  { time: "2018-12-23", value: 31.11 },
-  { time: "2018-12-24", value: 27.02 },
-  { time: "2018-12-25", value: 27.32 },
-  { time: "2018-12-26", value: 25.17 },
-  { time: "2018-12-27", value: 28.89 },
-  { time: "2018-12-28", value: 25.46 },
-  { time: "2018-12-29", value: 23.92 },
-  { time: "2018-12-30", value: 22.68 },
-  { time: "2018-12-31", value: 22.67 },
-  { time: "2019-01-01", value: 33.67 },
-];
 
 type Store = {
   activity: {
@@ -118,11 +38,10 @@ const useStore = create<Store>()(set => ({
 export default function Bento({ username }: { username: string }) {
   const [mode, setMode] = useState<"buy" | "sell">("buy");
   const [amount, setAmount] = useState("");
-  const [balance, setBalance] = useState<string | null>(null);
-  const [tokens, setTokens] = useState<bigint>(BigInt(0));
   const { wallets } = useWallets();
   const { user } = usePrivy();
-  const { data, mutate } = useGraph(user?.twitter?.username ?? "", user?.wallet?.address ?? "");
+
+  const [loading, setLoading] = useState(false);
 
   const [maxSellAmount, setMaxSellAmount] = useState(1); // Simulated max amount to sell
   const [tweetContent, setTweetContent] = useState("");
@@ -130,18 +49,18 @@ export default function Bento({ username }: { username: string }) {
 
   const { activity, pushActivity } = useStore();
 
-  useEffect(() => {
-    async function init() {
-      if (user && user.wallet) {
-        const balance = await getWalletBalance(user.wallet.address);
-        const tokens_data = await getSharesCount(`x-${username}`, user.wallet.address);
-        setBalance(balance);
-        setTokens(tokens_data);
-      }
-    }
+  const query = useQuery({
+    queryKey: ["balances", user?.wallet?.address],
+    queryFn: async () => {
+      // @ts-ignore
+      const balance = await getWalletBalance(user?.wallet?.address);
+      // @ts-ignore
+      const tokens_data = await getSharesCount(`x-${username}`, user?.wallet?.address);
 
-    init();
-  }, [user, username]);
+      return { balance, tokens: tokens_data };
+    },
+    enabled: !!user && !!user.wallet,
+  });
 
   const handleReset = () => {
     setAmount("");
@@ -152,6 +71,10 @@ export default function Bento({ username }: { username: string }) {
       console.log("No wallet found");
       return;
     }
+
+    if (loading) return;
+
+    setLoading(true);
 
     const wallet = wallets[0]; // Replace this with your desired wallet
     await wallet.switchChain(chain.id);
@@ -183,14 +106,17 @@ export default function Bento({ username }: { username: string }) {
       pushActivity({
         address: user.wallet.address,
         type: "buy",
-        price: Number(price),
+        price: Number(formatEther(price)),
         amount: Number(amount),
         timeAgo: new Date().toLocaleString(),
-        link: `https://neon-devnet.blockscout.com/tx/${transactionHash}`,
+        link: `https://sepolia.scrollscan.com/tx/${transactionHash}`,
       });
     } catch (error) {
       console.error("Error sending transaction:", error);
     }
+
+    query.refetch();
+    setLoading(false);
   };
 
   const handleSell = async () => {
@@ -198,6 +124,9 @@ export default function Bento({ username }: { username: string }) {
       console.log("No wallet found");
       return;
     }
+
+    if (loading) return;
+    setLoading(true);
 
     const wallet = wallets[0]; // Replace this with your desired wallet
     await wallet.switchChain(chain.id);
@@ -228,14 +157,18 @@ export default function Bento({ username }: { username: string }) {
       pushActivity({
         address: user.wallet.address,
         type: "sell",
-        price: Number(price),
+        price: Number(formatEther(price)),
         amount: Number(amount),
         timeAgo: new Date().toLocaleString(),
-        link: `https://neon-devnet.blockscout.com/tx/${transactionHash}`,
+        link: `https://sepolia.scrollscan.com/tx/${transactionHash}`,
       });
     } catch (error) {
       console.error("Error sending transaction:", error);
     }
+
+    query.refetch();
+
+    setLoading(false);
   };
 
   const handleQuickBuy = (value: number) => {
@@ -246,75 +179,6 @@ export default function Bento({ username }: { username: string }) {
     const sellAmount = ((maxSellAmount * percentage) / 100).toFixed(8);
     setAmount(sellAmount);
   };
-
-  function transformCreditsTradesToChartData(creditsTrades: any): { time: number; value: number }[] {
-    // Sort by timestamp in ascending order
-    const sortedTrades = creditsTrades.sort((a: any, b: any) => Number(a.timestamp) - Number(b.timestamp));
-
-    return sortedTrades.map((trade: any) => {
-      // const date = new Date(Number(trade.timestamp) / 1000000);
-      // const formattedDate = date.toISOString().split("T")[0]; // Format as YYYY-MM-DD
-      const value = Number(trade.tradeEvent_newCurrentPrice) / 1e14; // Convert newCurrentPrice to a more readable number
-      return { time: Number(trade.timestamp), value };
-    });
-  }
-
-  const trades = useMemo(() => {
-    if (!data) return [];
-
-    return transformCreditsTradesToChartData(data["creditsTrades"]);
-  }, [data]);
-
-  const activityData = useMemo(() => {
-    if (!data) return [];
-
-    function timeAgo(timestamp: any) {
-      const now = Date.now();
-      const secondsAgo = Math.floor((now - timestamp) / 1000);
-
-      if (secondsAgo < 60) {
-        return `${secondsAgo} seconds ago`;
-      } else if (secondsAgo < 3600) {
-        const minutes = Math.floor(secondsAgo / 60);
-        return `${minutes} minutes ago`;
-      } else if (secondsAgo < 86400) {
-        const hours = Math.floor(secondsAgo / 3600);
-        return `${hours} hours ago`;
-      } else {
-        const days = Math.floor(secondsAgo / 86400);
-        return `${days} days ago`;
-      }
-    }
-
-    return data["creditsTrades"]
-      .map((trade: any) => ({
-        user: trade.visibility.creator || "unknown",
-        type: trade.tradeEvent_isBuy ? "buy" : "sell",
-        price: trade.tradeEvent_tradeCost / 1e18,
-        amount: trade.tradeEvent_amount,
-        timeAgo: timeAgo(Number(trade.timestamp) / 1000),
-      }))
-      .reverse();
-  }, [data]);
-
-  const topHoldersData = useMemo(() => {
-    if (!data) return [];
-
-    const totalSupply = data["visibility"]["totalSupply"];
-    const visibilityBalances = data["visibility"]["balances"];
-
-    return visibilityBalances.map((balance: any) => {
-      let percentage = (balance.balance / totalSupply) * 100;
-      if (Number.isNaN(percentage)) percentage = 0;
-
-      return {
-        username: balance.user,
-        avatar: "",
-        balance: balance.balance,
-        percentage: percentage.toFixed(2),
-      };
-    });
-  }, [data]);
 
   return (
     <div className="mt-4 mb-12">
@@ -338,10 +202,10 @@ export default function Bento({ username }: { username: string }) {
             </div>
           </div>
           <div className="overflow-hidden rounded-md aspect-video">
-            {trades.length > 0 ? (
-              <ChartComponent data={trades} />
+            {[].length > 0 ? (
+              <ChartComponent data={[]} />
             ) : (
-              <div className="flex items-center justify-center h-full text-muted-foreground">loading...</div>
+              <div className="flex items-center justify-center h-full text-muted-foreground">No data available</div>
             )}
           </div>
         </div>
@@ -351,8 +215,13 @@ export default function Bento({ username }: { username: string }) {
           <div className="flex items-center justify-between">
             <h2 className="mb-2 text-lg font-semibold">Trade</h2>
             <h2 className="mb-2 font-semibold text-md">
-              {/* {balance} NEON | {tokens?.toString()} Tokens */}
-              {mode === "buy" ? `${Number(balance ?? 0).toFixed(5)} NEON` : `${tokens?.toString()} x-${username}`}
+              {query.status === "pending"
+                ? "Loading..."
+                : query.status === "error"
+                  ? "Error"
+                  : mode === "buy"
+                    ? `${Number(query.data?.balance ?? 0).toFixed(5)} ETH`
+                    : `${query.data?.tokens?.toString()} x-${username}`}
             </h2>
           </div>
           <Tabs defaultValue="buy" onValueChange={value => setMode(value as "buy" | "sell")}>
@@ -391,7 +260,29 @@ export default function Bento({ username }: { username: string }) {
                     25
                   </Button>
                 </div>
-                <Button className="w-full bg-green-500 hover:bg-green-600" onClick={handleBuy}>
+                <Button className="w-full bg-green-500 hover:bg-green-600" onClick={handleBuy} disabled={loading}>
+                  {loading && (
+                    <svg
+                      className="w-5 h-5 mr-3 -ml-1 text-muted animate-spin"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        stroke-width="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                  )}
                   Buy
                 </Button>
                 <p className="text-sm text-muted-foreground">
@@ -417,7 +308,7 @@ export default function Bento({ username }: { username: string }) {
                   <Button variant="outline" size="sm" onClick={handleReset}>
                     Reset
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleQuickSell(25)}>
+                  {/* <Button variant="outline" size="sm" onClick={() => handleQuickSell(25)}>
                     25%
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => handleQuickSell(50)}>
@@ -428,9 +319,31 @@ export default function Bento({ username }: { username: string }) {
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => handleQuickSell(100)}>
                     100%
-                  </Button>
+                  </Button> */}
                 </div>
-                <Button className="w-full" variant="destructive" onClick={handleSell}>
+                <Button className="w-full" variant="destructive" onClick={handleSell} disabled={loading}>
+                  {loading && (
+                    <svg
+                      className="w-5 h-5 mr-3 -ml-1 text-muted animate-spin"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        stroke-width="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                  )}
                   Sell
                 </Button>
                 <p className="text-sm text-muted-foreground">
@@ -454,10 +367,10 @@ export default function Bento({ username }: { username: string }) {
                   <TableRow>
                     <TableHead>User</TableHead>
                     <TableHead>Type</TableHead>
-                    <TableHead>Price (USD)</TableHead>
+                    <TableHead>Price (ETH)</TableHead>
                     <TableHead>Amount</TableHead>
                     <TableHead>Time</TableHead>
-                    <TableHead>Link</TableHead>
+                    <TableHead>View tx</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -497,7 +410,7 @@ export default function Bento({ username }: { username: string }) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {topHoldersData.map((holder, index) => (
+                  {/* {[].map((holder, index) => (
                     <TableRow key={index}>
                       <TableCell className="flex items-center space-x-2">
                         <Avatar>
@@ -512,7 +425,7 @@ export default function Bento({ username }: { username: string }) {
                         <Link />
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ))} */}
                 </TableBody>
               </Table>
             </TabsContent>

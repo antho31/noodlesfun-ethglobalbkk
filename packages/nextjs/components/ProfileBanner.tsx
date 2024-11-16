@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
+import { Button } from "@/components/ui/button";
 
 interface Stat {
   label: string;
@@ -52,7 +53,10 @@ export default function ProfileBanner({
             <p className="text-muted-foreground">@{handle}</p>
           </div>
         </div>
-        <p className="mt-2 text-foreground">{description}</p>
+        <div className="flex items-center justify-between">
+          <p className="mt-2 text-foreground">{description}</p>
+          <Button className="bg-green-500 hover:bg-green-600">Claim 50 ETH</Button>
+        </div>
       </div>
 
       {/* Stats */}
