@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import Autoplay from "embla-carousel-autoplay";
 import { DollarSign, TrendingUp } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -13,6 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 export const featuredCreators = [
   {
     id: 1,
+    username: "elonmusk",
     name: "Elon Musk",
     image: "https://pbs.twimg.com/profile_images/1849727333617573888/HBgPUrjG_400x400.jpg",
     price: "69,420$",
@@ -21,6 +23,7 @@ export const featuredCreators = [
   },
   {
     id: 2,
+    username: "VitalikButerin",
     name: "Vitalik Buterin",
     image: "https://pbs.twimg.com/profile_images/1748153260203229184/sXJIGMBk_400x400.jpg",
     price: "2 ETH",
@@ -29,6 +32,7 @@ export const featuredCreators = [
   },
   {
     id: 3,
+    username: "blknoiz06",
     name: "Ansem",
     image: "https://pbs.twimg.com/profile_images/1847482699805597696/ZhvERGEx_400x400.jpg",
     price: "100$",
@@ -38,22 +42,17 @@ export const featuredCreators = [
   },
   {
     id: 4,
+    username: "idrawline",
     name: "mitch (rtrd/acc)",
     image: "https://pbs.twimg.com/profile_images/1774942228630134784/tzr1yvLR_400x400.jpg",
     price: "100,000$",
     description: "CEO of retardios",
     tags: ["KOL"],
   },
+
   {
     id: 5,
-    name: "mert",
-    image: "https://pbs.twimg.com/profile_images/1775535430835863552/zgFeCArT_400x400.jpg",
-    price: "50$",
-    description: "dev at helios",
-    tags: ["dev"],
-  },
-  {
-    id: 6,
+    username: "0xRamonos",
     name: "ram",
     image: "https://pbs.twimg.com/profile_images/1778954511349903360/kBSJNkBx_400x400.jpg",
     price: "145$",
@@ -61,7 +60,8 @@ export const featuredCreators = [
     tags: ["KOL"],
   },
   {
-    id: 7,
+    id: 6,
+    username: "dxrnelljcl",
     name: "dxrnelljcl",
     image: "https://pbs.twimg.com/profile_images/1837951259971579904/3bcI8tP2_400x400.jpg",
     price: "145$",
@@ -70,6 +70,8 @@ export const featuredCreators = [
   },
 ];
 
+// @ts-ignore
+/*
 const latestActivities = [
   {
     id: 1,
@@ -115,9 +117,9 @@ const latestActivities = [
     creator: "Emma",
     price: 180,
     time: "20 minutes ago",
-  },
+  },  
 ];
-
+*/
 export default function Home() {
   return (
     <div className="w-full px-5 py-5 mb-24 md:px-16 4xl:px-4 3xl:container">
@@ -146,7 +148,6 @@ export default function Home() {
                       <img src={creator.image} alt={creator.name} className="object-cover w-full h-64" />
                       <div className="p-4">
                         <h3 className="text-lg font-semibold">{creator.name}</h3>
-                        <p className="text-sm font-bold">${creator.price}</p>
                         <p className="mt-2 text-xs text-muted-foreground">{creator.description}</p>
                         <div className="flex flex-wrap gap-2 mt-2">
                           {creator.tags.map(tag => (
@@ -157,9 +158,12 @@ export default function Home() {
                         </div>
                       </div>
                       <div className="absolute inset-0 flex items-center justify-center transition-all duration-300 bg-black bg-opacity-0 group-hover:bg-opacity-50">
-                        <Button className="transition-opacity duration-300 opacity-0 group-hover:opacity-100">
-                          Trade Now
-                        </Button>
+                        <Link
+                          href={`./profile/${creator.username}`}
+                          className="transition-opacity duration-300 opacity-0 group-hover:opacity-100"
+                        >
+                          <Button>Trade Now</Button>
+                        </Link>
                       </div>
                     </CardContent>
                   </Card>
@@ -172,6 +176,7 @@ export default function Home() {
         </section>
 
         {/* Latest Activity Section */}
+        {/*
         <section>
           <h2 className="mb-4 text-2xl font-bold">Latest Activity</h2>
           <Table>
@@ -184,8 +189,9 @@ export default function Home() {
                 <TableHead>Time</TableHead>
               </TableRow>
             </TableHeader>
+            
             <TableBody>
-              {latestActivities.map(activity => (
+              { latestActivities.map(activity => (
                 <TableRow key={activity.id}>
                   <TableCell>
                     <div className="flex items-center space-x-2">
@@ -206,10 +212,12 @@ export default function Home() {
                   <TableCell>${activity.price}</TableCell>
                   <TableCell>{activity.time}</TableCell>
                 </TableRow>
-              ))}
+              )) }
             </TableBody>
           </Table>
+          
         </section>
+        */}
       </div>
     </div>
   );
