@@ -4,11 +4,11 @@
 
 ### Built With
 
-- **Privy:** Ties Twitter accounts to Ethereum wallets seamlessly.  
-- **Subgraph:** Fully decentralized data for promotion services and trading history.  
-  **Query URL:** [Subgraph Explorer](https://graph-secured.neontest.xyz/subgraphs/name/noodlesfun-neonevmdevnet/graphql?query=%7B%0A++_meta+%7B%0A++++block+%7B%0A++++++number%0A++++%7D%0A++++hasIndexingErrors%0A++%7D%0A++visibilities+%7B+%0A++++id+%23+eg.+twitter+handle%0A++++creator%0A++++services+%7B%0A++++++id%0A++++++serviceType+%23+eg.+x-post%0A++++++creditsCostAmount+%23+tokens+to+spend+for+this+service%0A++++++enabled%0A++++++executions+%7B%0A++++++++executionNonce%0A++++++++requester+%23+user+addr%0A++++++++state+%23+REQUESTED%2C+ACCEPTED%2C+DISPUTED%2C+REFUNDED%2C+VALIDATED%0A++++++++requestData%0A++++++++responseData%0A++++++++cancelData%0A++++++++disputeData%0A++++++++resolveData%0A++++++++lastUpdated%0A++++++%7D%0A++++%7D%0A++++balances+%7B%0A++++++user+%23+user+addr%0A++++++balance+%23+user+balance+for+this+visibility%0A++++%7D%0A++%7D%0A%7D)
+- **Privy:** Ties Twitter accounts to Ethereum wallets seamlessly.
+- **Subgraph:** Fully decentralized data for promotion services and trading history.
+- **Query URL:** [Subgraph Explorer](https://graph-secured.neontest.xyz/subgraphs/name/noodlesfun-neonevmdevnet/graphql?query=%7B%0A++_meta+%7B%0A++++block+%7B%0A++++++number%0A++++%7D%0A++++hasIndexingErrors%0A++%7D%0A++visibilities+%7B+%0A++++id+%23+eg.+twitter+handle%0A++++creator%0A++++services+%7B%0A++++++id%0A++++++serviceType+%23+eg.+x-post%0A++++++creditsCostAmount+%23+tokens+to+spend+for+this+service%0A++++++enabled%0A++++++executions+%7B%0A++++++++executionNonce%0A++++++++requester+%23+user+addr%0A++++++++state+%23+REQUESTED%2C+ACCEPTED%2C+DISPUTED%2C+REFUNDED%2C+VALIDATED%0A++++++++requestData%0A++++++++responseData%0A++++++++cancelData%0A++++++++disputeData%0A++++++++resolveData%0A++++++++lastUpdated%0A++++++%7D%0A++++%7D%0A++++balances+%7B%0A++++++user+%23+user+addr%0A++++++balance+%23+user+balance+for+this+visibility%0A++++%7D%0A++%7D%0A%7D)
 - **Neon EVM L2:** Scalable Ethereum dApps on Solana's fast, low-cost infrastructure.
-- **Blockscout:** User-friendly blockchain explorer to verify and interact with deployed contracts.  
+- **Blockscout:** User-friendly blockchain explorer to verify and interact with deployed contracts.
 
 ---
 

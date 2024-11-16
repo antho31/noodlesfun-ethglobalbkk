@@ -26,5 +26,6 @@ tmp
 # Graph CLI generated artifacts
 packages/subgraph/build/
 packages/subgraph/generated/
+packages/subgraph/tests/.bin
 
 packages/hardhat/deployments/neondevnet
