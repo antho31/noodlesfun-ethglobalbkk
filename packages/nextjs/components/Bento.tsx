@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState } from "react";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
-import { useQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 import { Link, Share2 } from "lucide-react";
 import { encodeFunctionData, formatEther } from "viem";
 import { create } from "zustand";
@@ -16,7 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import deployedContracts from "@/contracts/deployedContracts";
-import { getBuyPrice, getSellPrice, getSharesCount, getWalletBalance } from "@/lib/web3";
+import { getBuyPrice, getSellPrice, getSharesCount, getVisibilityData, getWalletBalance } from "@/lib/web3";
 
 type Store = {
   activity: {
@@ -49,7 +49,9 @@ export default function Bento({ username }: { username: string }) {
 
   const { activity, pushActivity } = useStore();
 
-  const query = useQuery({
+  const visibilityId = `x-${username}`;
+
+  const userBalanceQuery = useQuery({
     queryKey: ["balances", user?.wallet?.address],
     queryFn: async () => {
       // @ts-ignore
@@ -60,6 +62,21 @@ export default function Bento({ username }: { username: string }) {
       return { balance, tokens: tokens_data };
     },
     enabled: !!user && !!user.wallet,
+  });
+
+  const visibilityQuery = useQuery({
+    queryKey: ["visibility", visibilityId],
+    queryFn: async () => {
+      const data = (await getVisibilityData(visibilityId)) as any;
+      const tradeData = data.data.visibility.trades.map((trade: any) => {
+        // { time: "2018-12-22", value: 32.51 },
+        return {
+          time: Number(trade.blockTimestamp),
+          value: Number(formatEther(trade.tradeEvent_newCurrentPrice)),
+        };
+      });
+      return { tradeData };
+    },
   });
 
   const handleReset = () => {
@@ -115,7 +132,8 @@ export default function Bento({ username }: { username: string }) {
       console.error("Error sending transaction:", error);
     }
 
-    query.refetch();
+    userBalanceQuery.refetch();
+    visibilityQuery.refetch();
     setLoading(false);
   };
 
@@ -166,8 +184,8 @@ export default function Bento({ username }: { username: string }) {
       console.error("Error sending transaction:", error);
     }
 
-    query.refetch();
-
+    userBalanceQuery.refetch();
+    visibilityQuery.refetch();
     setLoading(false);
   };
 
@@ -210,8 +228,8 @@ export default function Bento({ username }: { username: string }) {
           </div>
           <div className="overflow-hidden rounded-md aspect-video">
             {/* TODO: TRADES */}
-            {[].length > 0 ? (
-              <ChartComponent data={[]} />
+            {visibilityQuery.data?.tradeData?.length > 0 ? (
+              <ChartComponent data={visibilityQuery.data?.tradeData} />
             ) : (
               <div className="flex items-center justify-center h-full text-muted-foreground">No data available</div>
             )}
@@ -223,13 +241,13 @@ export default function Bento({ username }: { username: string }) {
           <div className="flex items-center justify-between">
             <h2 className="mb-2 text-lg font-semibold">Trade</h2>
             <h2 className="mb-2 font-semibold text-md">
-              {query.status === "pending"
+              {userBalanceQuery.status === "pending"
                 ? "Loading..."
-                : query.status === "error"
+                : userBalanceQuery.status === "error"
                   ? "Error"
                   : mode === "buy"
-                    ? `${Number(query.data?.balance ?? 0).toFixed(5)} ETH`
-                    : `${query.data?.tokens?.toString()} x-${username}`}
+                    ? `${Number(userBalanceQuery.data?.balance ?? 0).toFixed(5)} ETH`
+                    : `${userBalanceQuery.data?.tokens?.toString()} x-${username}`}
             </h2>
           </div>
           <Tabs defaultValue="buy" onValueChange={value => setMode(value as "buy" | "sell")}>

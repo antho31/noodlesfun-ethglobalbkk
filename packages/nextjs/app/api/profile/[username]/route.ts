@@ -24,6 +24,7 @@ export async function GET(request: NextRequest, { params }: { params: { username
   const { username } = params;
 
   // Check if data is cached
+
   const cachedData = cache.get(username);
   if (cachedData) {
     return NextResponse.json(cachedData as Response);
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest, { params }: { params: { username
 
   try {
     // Fetch from the Flask API if not in cache
-    const response = await axios.get(`http://localhost:3001/api/profile/${username}`);
+    const response = await axios.get(`http://queue.siborg.io:3001/api/profile/${username}`);
 
     // Cache the response data
     cache.set(username, response.data);

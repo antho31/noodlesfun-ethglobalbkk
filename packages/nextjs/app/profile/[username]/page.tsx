@@ -26,11 +26,13 @@ export default async function Profile({ params }: { params: { username: string }
   let data: Response;
 
   try {
-    data = await fetch(`http://localhost:3001/api/profile/${username}`, {
+    data = await fetch(`http://queue.siborg.io:3001/api/profile/${username}`, {
+      /*
       cache: "force-cache",
       next: {
         revalidate: 60 * 60 * 24,
       },
+      */
     }).then(res => res.json());
   } catch (e) {
     data = { error: "ERROR" };

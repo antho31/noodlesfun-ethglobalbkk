@@ -2,10 +2,76 @@ import { Hash, createPublicClient, formatEther, getAddress, http } from "viem";
 import { chain } from "@/components/Providers";
 import deployedContracts from "@/contracts/deployedContracts";
 
+const graphUrl = "https://api.studio.thegraph.com/query/95019/noodlesfun-scrollsepolia/0.0.5";
+
 const publicClient = createPublicClient({
   chain: chain,
   transport: http(),
 });
+
+export async function fetchSubgraph(query: string, variables: any) {
+  const response = await fetch(graphUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query,
+      variables,
+    }),
+  });
+
+  const data = await response.json();
+  return data;
+}
+
+export function getVisibilityData(visibilityId: string) {
+  return fetchSubgraph(
+    `
+  query getVisibilityData($visibilityId: ID!) {
+    visibility(id: $visibilityId) { 
+      id # eg. twitter handle
+      creator
+      trades(orderBy: blockTimestamp orderDirection: asc) {
+        tradeEvent_from
+        tradeEvent_amount
+        tradeEvent_isBuy
+        tradeEvent_tradeCost
+        tradeEvent_creatorFee
+        tradeEvent_protocolFee
+        tradeEvent_referrerFee
+        tradeEvent_referrer
+        tradeEvent_newTotalSupply
+        tradeEvent_newCurrentPrice
+        blockTimestamp
+        transactionHash
+      }
+      services {
+        id
+        serviceType # eg. x-post
+        creditsCostAmount # tokens to spend for this service
+        enabled
+        executions {
+          executionNonce
+          requester # user addr
+          state # REQUESTED, ACCEPTED, DISPUTED, REFUNDED, VALIDATED
+          requestData
+          responseData
+          cancelData
+          disputeData
+          resolveData
+          lastUpdated
+        }
+      }
+      balances(orderBy: balance orderDirection: desc) {
+        user # user addr
+        balance # user balance for this visibility
+      }
+    }
+  }`,
+    { visibilityId },
+  );
+}
 
 export async function getWalletBalance(walletAddress: string) {
   const balance = await publicClient.getBalance({ address: walletAddress });
