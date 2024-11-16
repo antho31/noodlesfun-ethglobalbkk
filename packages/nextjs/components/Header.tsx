@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useLoginWithOAuth, usePrivy } from "@privy-io/react-auth";
+import { useLoginWithOAuth, usePrivy, useWallets } from "@privy-io/react-auth";
 import { LogOut, Settings, Wallet } from "lucide-react";
+import { getBalance } from "viem/actions";
 import { SearchBar } from "@/components/Search";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -16,10 +17,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { NavigationMenu, NavigationMenuItem, NavigationMenuList } from "@/components/ui/navigation-menu";
+import { getWalletBalance } from "@/lib/web3";
 
 export const Header = () => {
   const { ready, logout, user, createWallet } = usePrivy();
   const { loading, initOAuth } = useLoginWithOAuth();
+  const [balance, setBalance] = useState<string | null>(null);
 
   const handleInitOAuth = async () => {
     try {
@@ -34,6 +37,9 @@ export const Header = () => {
       if (user && !user.wallet) {
         createWallet();
         return;
+      } else if (user && user.wallet) {
+        const balance = await getWalletBalance(user.wallet.address);
+        setBalance(balance);
       }
     }
 
@@ -97,7 +103,7 @@ export const Header = () => {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem>
                     <Wallet className="w-4 h-4 mr-2" />
-                    <span>0.5 ETH</span>
+                    <span>{balance?.toString()} NEON</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem className="cursor-pointer">

@@ -1,5 +1,12 @@
+"use server";
+
 import React from "react";
+import { useWallets } from "@privy-io/react-auth";
+import { PrivyClient } from "@privy-io/server-auth";
+import Bento from "@/components/Bento";
 import ProfileBanner from "@/components/ProfileBanner";
+
+const privy = new PrivyClient("cm3j2xanc00ohxc232di6d8z5", "");
 
 type Response =
   | {
@@ -26,6 +33,7 @@ export default async function Profile({ params }: { params: { username: string }
   if ("error" in data) {
     return <div>{data.error}</div>;
   }
+
   return (
     <>
       <div className="w-full px-5 md:px-4 4xl:px-4 py-0 2xl:container min-h-[85vh]">
@@ -38,8 +46,21 @@ export default async function Profile({ params }: { params: { username: string }
           stats={[
             { label: "Following", value: data?.following },
             { label: "Followers", value: data?.followers },
+            {
+              label: "Market Cap",
+              value: "TODO",
+            },
+            {
+              label: "24h Volume",
+              value: "TODO",
+            },
+            {
+              label: "Holders",
+              value: "TODO",
+            },
           ]}
         />
+        <Bento />
       </div>
     </>
   );
