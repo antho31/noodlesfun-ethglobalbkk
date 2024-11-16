@@ -22,3 +22,7 @@ node_modules
 # cli
 dist
 tmp
+
+# Graph CLI generated artifacts
+packages/subgraph/build/
+packages/subgraph/generated/
