@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useLoginWithOAuth, usePrivy, useWallets } from "@privy-io/react-auth";
-import { LogOut, Settings, Wallet } from "lucide-react";
+import { Copy, LogOut, Settings, Wallet } from "lucide-react";
 import { getBalance } from "viem/actions";
 import { SearchBar } from "@/components/Search";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -23,7 +24,7 @@ export const Header = () => {
   const { ready, logout, user, createWallet } = usePrivy();
   const { loading, initOAuth } = useLoginWithOAuth();
   const [balance, setBalance] = useState<string | null>(null);
-
+  const router = useRouter();
   const handleInitOAuth = async () => {
     try {
       await initOAuth({ provider: "twitter" });
@@ -79,6 +80,9 @@ export const Header = () => {
           </nav>
 
           <div className="gap-2 pl-3 md:flex">
+            <span className="items-center justify-between hidden text-purple-400 md:flex">
+              {Number(balance).toPrecision(5)} ETH
+            </span>
             {!ready || loading ? (
               <Button disabled onClick={handleInitOAuth} className="cursor-pointer text-bold bg-card">
                 Loading...
@@ -99,11 +103,24 @@ export const Header = () => {
                   </Avatar>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56 bg-background">
-                  <DropdownMenuLabel>@{user?.twitter?.username}</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <Wallet className="w-4 h-4 mr-2" />
-                    <span>{balance?.toString()} NEON</span>
+                  <DropdownMenuItem
+                    className="flex items-center justify-between"
+                    onClick={() => {
+                      router.push(`/profile/${user.twitter?.username}`);
+                    }}
+                  >
+                    @{user?.twitter?.username}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      // @ts-ignore
+                      navigator.clipboard.writeText(user.wallet?.address);
+                    }}
+                  >
+                    <Copy className="w-4 h-4 mr-2" />
+                    <span className="w-full text-left">
+                      {user.wallet?.address.slice(0, 6)}...{user.wallet?.address.slice(-4)}
+                    </span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem className="cursor-pointer">

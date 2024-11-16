@@ -1,7 +1,6 @@
 "use server";
 
-import React from "react";
-import { useWallets } from "@privy-io/react-auth";
+import React, { useEffect } from "react";
 import { PrivyClient } from "@privy-io/server-auth";
 import Bento from "@/components/Bento";
 import ProfileBanner from "@/components/ProfileBanner";
@@ -23,15 +22,27 @@ type Response =
 
 export default async function Profile({ params }: { params: { username: string } }) {
   const { username } = params;
-  const data: Response = await fetch(`http://localhost:3001/api/profile/${username}`, {
-    cache: "force-cache",
-    next: {
-      revalidate: 60 * 60 * 24,
-    },
-  }).then(res => res.json());
+
+  let data: Response;
+
+  try {
+    data = await fetch(`http://localhost:3001/api/profile/${username}`, {
+      cache: "force-cache",
+      next: {
+        revalidate: 60 * 60 * 24,
+      },
+    }).then(res => res.json());
+  } catch (e) {
+    data = { error: "ERROR" };
+  }
 
   if ("error" in data) {
-    return <div>{data.error}</div>;
+    // redirect to 404
+    return (
+      <div className="flex items-center justify-center w-full min-h-[55vh] text-4xl font-bold text-white">
+        404 - Not Found
+      </div>
+    );
   }
 
   return (
@@ -48,15 +59,7 @@ export default async function Profile({ params }: { params: { username: string }
             { label: "Followers", value: data?.followers },
             {
               label: "Market Cap",
-              value: "TODO",
-            },
-            {
-              label: "24h Volume",
-              value: "TODO",
-            },
-            {
-              label: "Holders",
-              value: "TODO",
+              value: "420.69$",
             },
           ]}
         />

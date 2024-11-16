@@ -3,17 +3,19 @@
 import { PrivyProvider } from "@privy-io/react-auth";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { defineChain } from "viem";
-import { neonDevnet } from "viem/chains";
+import { neonDevnet, scrollSepolia } from "viem/chains";
 
-export const chain = defineChain({
-  ...neonDevnet,
-  blockExplorers: {
-    default: {
-      name: "Neonscan",
-      url: "https://neon-devnet.blockscout.com",
-    },
-  },
-});
+// export const chain = defineChain({
+//   ...neonDevnet,
+//   blockExplorers: {
+//     default: {
+//       name: "Neonscan",
+//       url: "https://neon-devnet.blockscout.com",
+//     },
+//   },
+// });
+
+export const chain = scrollSepolia;
 
 export const queryClient = new QueryClient();
 
