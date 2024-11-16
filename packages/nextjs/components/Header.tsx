@@ -36,11 +36,21 @@ export const Header = () => {
   useEffect(() => {
     async function init() {
       if (user && !user.wallet) {
-        await createWallet();
+        try {
+          await createWallet();
+        } catch (err) {
+          console.error(err);
+          alert("Failed to create wallet");
+        }
         return;
       } else if (user && user.wallet) {
-        const balance = await getWalletBalance(user.wallet.address);
-        setBalance(balance);
+        try {
+          const balance = await getWalletBalance(user.wallet.address);
+          setBalance(balance);
+        } catch (err) {
+          console.error(err);
+          alert("Failed to get wallet balance");
+        }
       }
     }
 
