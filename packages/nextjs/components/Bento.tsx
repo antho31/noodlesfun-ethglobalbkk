@@ -61,14 +61,6 @@ export default function Bento({ username }: { username: string }) {
     });
   }, [user]);
 
-  /*
-    useEffect(() => {
-    if (user && user.wallet) {
-      console.log("User wallet found", user.wallet, user);
-    }
-  }, []);
-  */
-
   const userBalanceQuery = useQuery({
     queryKey: ["balances", user?.wallet?.address],
     queryFn: async () => {
@@ -105,10 +97,68 @@ export default function Bento({ username }: { username: string }) {
           };
         })
         .reverse();
-      return { tradeData, activityData };
+      const services = data.data.visibility.services.map((service: any) => service);
+      return { visibility: data.data.visibility, tradeData, activityData, services };
     },
     refetchInterval: 1000,
   });
+
+  useEffect(() => {
+    const wallet = wallets[0]; // Replace this with your desired wallet
+
+    async function createService() {
+      if (visibilityQuery.data?.services?.length === 0 && user?.wallet?.address && wallets && wallets[0]) {
+        await wallet.switchChain(chain.id);
+        const provider = await wallet.getEthereumProvider();
+        const balance = await getWalletBalance(user.wallet.address as string);
+        if (Number(balance) > 0) {
+          console.log("create service...");
+
+          const writeData = encodeFunctionData({
+            // @ts-ignore
+            abi: deployedContracts[534351].VisibilityServices.abi,
+            functionName: "createService",
+            args: [`x-post`, `x-${username}`, BigInt("10")],
+          });
+          const transactionRequest = {
+            // @ts-ignore
+            to: deployedContracts[534351].VisibilityServices.address,
+            data: writeData,
+          };
+
+          console.log("ready to create service", transactionRequest);
+
+          try {
+            console.log("sending transaction...", transactionRequest);
+            const transactionHash = await provider.request({
+              method: "eth_sendTransaction",
+              params: [transactionRequest],
+            });
+
+            console.log("TRANSACTION HASH", transactionHash);
+
+            const receipt = await provider.request({
+              method: "eth_getTransactionReceipt",
+              params: [transactionHash],
+            });
+
+            console.log("RECEIPT", receipt);
+
+            //  visibilityQuery.refetch();
+          } catch (error) {
+            console.error("Error sending transaction:", error);
+          }
+        }
+      }
+    }
+
+    if (
+      visibilityQuery.data?.visibility?.creator &&
+      user?.wallet?.address &&
+      visibilityQuery.data.visibility.creator.toLowerCase() === user?.wallet?.address.toLowerCase()
+    )
+      createService();
+  }, [visibilityQuery?.data, user?.wallet?.address, wallets]);
 
   const handleReset = () => {
     setAmount("");

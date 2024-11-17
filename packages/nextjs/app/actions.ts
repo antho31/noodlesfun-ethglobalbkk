@@ -31,7 +31,7 @@ export async function link(username: string) {
     transport: http(),
   });
 
-  console.log("PUBLIC CLIENT", { chainId, chain: scrollSepolia, privy, publicClient });
+  console.log("PUBLIC CLIENT");
 
   const { abi, address: visibilityCreditsAddress } = deployedContracts[chainId].VisibilityCredits || {};
   if (!abi || !visibilityCreditsAddress) {
@@ -67,7 +67,7 @@ export async function link(username: string) {
       account: privateKeyToAccount(LINKER_PRIVATE_KEY as `0x-${string}`),
     });
 
-    console.log("WALLET CLIENT", { walletClient });
+    console.log("WALLET CLIENT");
 
     try {
       const txHash = await walletClient.writeContract({
