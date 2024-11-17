@@ -69,15 +69,15 @@ export const featuredCreators = [
   },
   {
     id: 7,
-    username: "dxrnelljcl",
-    name: "dxrnelljcl",
-    image: "https://pbs.twimg.com/profile_images/1837951259971579904/3bcI8tP2_400x400.jpg",
+    username: "AnthonyGourraud",
+    name: "Anthony Gourraud",
+    image: "https://pbs.twimg.com/profile_images/1625089710052806656/oE9gRxlk_400x400.jpg",
     price: "145$",
-    description: "TAG TRADER",
-    tags: ["KOL"],
+    description: "Dev at Noodles Finance",
+    tags: ["DEV"],
   },
 ];
-
+/*
 // @ts-ignore
 const latestActivities = [
   {
@@ -126,6 +126,7 @@ const latestActivities = [
     time: "20 minutes ago",
   },
 ];
+*/
 
 export default function Home() {
   return (
@@ -182,7 +183,7 @@ export default function Home() {
           </Carousel>
         </section>
 
-        {/* Latest Activity Section */}
+        {/* Latest Activity Section 
         <section>
           <h2 className="mb-4 text-2xl font-bold">Latest Activity</h2>
           <Table>
@@ -222,6 +223,7 @@ export default function Home() {
             </TableBody>
           </Table>
         </section>
+        */}
       </div>
     </div>
   );
