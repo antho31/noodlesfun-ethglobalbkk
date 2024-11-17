@@ -17,38 +17,35 @@ type Request = {
     avatar: string;
   };
   description: string;
-  status: "pending" | "accepted" | "rejected" | "accepted_step_1";
+  status: "pending" | "accepted" | "rejected" | "closed";
   twitterLink?: string;
 };
 
 const incomingRequests: Request[] = [
   {
     id: 1,
-    user: { name: "Alice", avatar: "/placeholder.svg?height=40&width=40" },
-    description:
-      "This is a long description that needs to be truncated. It contains important information about the request.",
+    user: { name: "Margaux", avatar: "https://pbs.twimg.com/profile_images/1811784020252065795/Jc1iiANb_400x400.jpg" },
+    // description about a promotional tweet
+    description: "Hey there! I'm looking forward to working with you. Here's a detailed description of the request.",
     status: "pending",
   },
   {
     id: 2,
-    user: { name: "Bob", avatar: "/placeholder.svg?height=40&width=40" },
-    description: "Another long description for a different request. This one also contains crucial details.",
-    status: "pending",
+    user: { name: "Bob", avatar: "https://pbs.twimg.com/profile_images/1847482699805597696/ZhvERGEx_400x400.jpg" },
+    description: "Thank you for the repost !",
+    status: "closed",
   },
 ];
 
 const outgoingRequests: Request[] = [
   {
     id: 3,
-    user: { name: "You", avatar: "/placeholder.svg?height=40&width=40" },
-    description: "Your outgoing request with a detailed description.",
+    user: {
+      name: "VitalikButerin",
+      avatar: "https://pbs.twimg.com/profile_images/1748153260203229184/sXJIGMBk_400x400.jpg",
+    },
+    description: "Hey Vitalik, would love to share with you about new...",
     status: "pending",
-  },
-  {
-    id: 4,
-    user: { name: "You", avatar: "/placeholder.svg?height=40&width=40" },
-    description: "Your accepted request waiting for confirmation.",
-    status: "accepted_step_1",
     twitterLink: "https://twitter.com/example/status/1234567890",
   },
 ];
@@ -59,6 +56,7 @@ export default function Component() {
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
   const [twitterLink, setTwitterLink] = useState("");
+  const [validated, setIsValidated] = useState(false);
 
   const handleAccept = (request: Request) => {
     setSelectedRequest(request);
@@ -66,7 +64,6 @@ export default function Component() {
   };
 
   const handleReject = (requestId: number) => {
-    // Implement reject logic here
     console.log("Rejected request:", requestId);
   };
 
@@ -75,6 +72,9 @@ export default function Component() {
       // Implement acceptance logic here
       console.log("Accepted request:", selectedRequest?.id, "with Twitter link:", twitterLink);
       setIsAcceptModalOpen(false);
+      setIsReviewModalOpen(false);
+      setIsValidated(true);
+      setSelectedRequest(null);
       setTwitterLink("");
     }
   };
@@ -95,7 +95,7 @@ export default function Component() {
       <TableHeader>
         <TableRow>
           <TableHead>User</TableHead>
-          <TableHead>Description</TableHead>
+          <TableHead>Content</TableHead>
           <TableHead>Status</TableHead>
           <TableHead>Actions</TableHead>
         </TableRow>
@@ -124,14 +124,14 @@ export default function Component() {
                 </Tooltip>
               </TooltipProvider>
             </TableCell>
-            <TableCell>{request.status}</TableCell>
+            <TableCell>{activeTab === "incoming" ? (validated ? "closed" : request.status) : request.status}</TableCell>
             <TableCell>
-              {request.status === "pending" && activeTab === "incoming" && (
+              {request.status === "pending" && activeTab === "incoming" && !validated && (
                 <Button variant="outline" onClick={() => handleReview(request)}>
                   Review
                 </Button>
               )}
-              {request.status === "accepted_step_1" && activeTab === "outgoing" && (
+              {request.status === "closed" && activeTab === "outgoing" && (
                 <Button variant="outline" onClick={() => handleReview(request)}>
                   Review
                 </Button>
@@ -145,7 +145,7 @@ export default function Component() {
 
   return (
     <div className="w-full px-5 py-5 mb-24 md:px-16 4xl:px-4 3xl:container">
-      <div className="w-full min-h-screen bg-background">
+      <div className="w-full min-h-[55vh] bg-background">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="incoming">Incoming</TabsTrigger>
@@ -166,7 +166,7 @@ export default function Component() {
             </DialogHeader>
             <div className="mt-4">
               <Label htmlFor="description">Request Description</Label>
-              <p id="description" className="mt-1 text-sm text-gray-600">
+              <p id="description" className="mt-1 text-sm text-white">
                 {selectedRequest?.description}
               </p>
             </div>
@@ -197,7 +197,7 @@ export default function Component() {
             </DialogHeader>
             <div className="mt-4">
               <Label htmlFor="review-description">Request Description</Label>
-              <p id="review-description" className="mt-1 text-sm text-gray-600">
+              <p id="review-description" className="mt-1 text-sm text-white">
                 {selectedRequest?.description}
               </p>
             </div>
@@ -222,9 +222,6 @@ export default function Component() {
               ) : (
                 <Button onClick={handleValidate}>Validate</Button>
               )}
-              <Button variant="outline" onClick={() => setIsReviewModalOpen(false)}>
-                Close
-              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -232,3 +229,5 @@ export default function Component() {
     </div>
   );
 }
+
+// https://pbs.twimg.com/profile_images/1811784020252065795/Jc1iiANb_400x400.jpg

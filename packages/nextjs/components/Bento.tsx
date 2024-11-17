@@ -9,7 +9,7 @@ import { encodeFunctionData, formatEther } from "viem";
 import { create } from "zustand";
 import { link } from "@/app/actions";
 import { ChartComponent } from "@/components/Chart";
-import { chain } from "@/components/Providers";
+import { chain, queryClient } from "@/components/Providers";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

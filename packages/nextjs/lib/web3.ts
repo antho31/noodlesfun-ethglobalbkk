@@ -151,3 +151,14 @@ export async function getCurrentPrice(token: string) {
 
   return data; // wei
 }
+
+export async function getCreator(address: string) {
+  const data = await publicClient.readContract({
+    address: deployedContracts[534351].VisibilityCredits.address,
+    abi: deployedContracts[534351].VisibilityCredits.abi,
+    functionName: "creators",
+    args: [address],
+  });
+
+  return data;
+}

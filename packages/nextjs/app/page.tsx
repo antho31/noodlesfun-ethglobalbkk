@@ -49,9 +49,17 @@ export const featuredCreators = [
     description: "CEO of retardios",
     tags: ["KOL"],
   },
-
   {
     id: 5,
+    username: "0xMert_",
+    name: "mert",
+    image: "https://pbs.twimg.com/profile_images/1775535430835863552/zgFeCArT_400x400.jpg",
+    price: "50$",
+    description: "dev at helios",
+    tags: ["dev"],
+  },
+  {
+    id: 6,
     username: "0xRamonos",
     name: "ram",
     image: "https://pbs.twimg.com/profile_images/1778954511349903360/kBSJNkBx_400x400.jpg",
@@ -60,7 +68,7 @@ export const featuredCreators = [
     tags: ["KOL"],
   },
   {
-    id: 6,
+    id: 7,
     username: "dxrnelljcl",
     name: "dxrnelljcl",
     image: "https://pbs.twimg.com/profile_images/1837951259971579904/3bcI8tP2_400x400.jpg",
@@ -71,7 +79,6 @@ export const featuredCreators = [
 ];
 
 // @ts-ignore
-/*
 const latestActivities = [
   {
     id: 1,
@@ -117,9 +124,9 @@ const latestActivities = [
     creator: "Emma",
     price: 180,
     time: "20 minutes ago",
-  },  
+  },
 ];
-*/
+
 export default function Home() {
   return (
     <div className="w-full px-5 py-5 mb-24 md:px-16 4xl:px-4 3xl:container">
@@ -176,7 +183,6 @@ export default function Home() {
         </section>
 
         {/* Latest Activity Section */}
-        {/*
         <section>
           <h2 className="mb-4 text-2xl font-bold">Latest Activity</h2>
           <Table>
@@ -189,9 +195,9 @@ export default function Home() {
                 <TableHead>Time</TableHead>
               </TableRow>
             </TableHeader>
-            
+
             <TableBody>
-              { latestActivities.map(activity => (
+              {latestActivities.map(activity => (
                 <TableRow key={activity.id}>
                   <TableCell>
                     <div className="flex items-center space-x-2">
@@ -212,12 +218,10 @@ export default function Home() {
                   <TableCell>${activity.price}</TableCell>
                   <TableCell>{activity.time}</TableCell>
                 </TableRow>
-              )) }
+              ))}
             </TableBody>
           </Table>
-          
         </section>
-        */}
       </div>
     </div>
   );
