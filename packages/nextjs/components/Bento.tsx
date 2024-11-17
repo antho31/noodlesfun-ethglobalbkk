@@ -47,8 +47,6 @@ export default function Bento({ username }: { username: string }) {
 
     getVisibility(`x-${username}`).then(async visibility => {
       const creator = visibility[0];
-      console.log("creator", creator);
-      console.log("user", user.wallet?.address);
 
       if (creator === user.wallet?.address) return;
 
@@ -98,7 +96,13 @@ export default function Bento({ username }: { username: string }) {
         })
         .reverse();
       const services = data.data.visibility.services.map((service: any) => service);
-      return { visibility: data.data.visibility, tradeData, activityData, services };
+      const service = services[0];
+      if (service && user?.wallet?.address) {
+        service.balance = data.data.visibility.balances.find(
+          (balance: any) => balance.user.toLowerCase() === (user?.wallet?.address as string).toLowerCase(),
+        )?.balance;
+      }
+      return { visibility: data.data.visibility, tradeData, activityData, services, service };
     },
     refetchInterval: 1000,
   });
@@ -259,21 +263,6 @@ export default function Bento({ username }: { username: string }) {
   const handleQuickBuy = (value: number) => {
     setAmount(value.toString());
   };
-
-  //   const handleQuickSell = (percentage: number) => {
-  //     const sellAmount = ((maxSellAmount * percentage) / 100).toFixed(8);
-  //     setAmount(sellAmount);
-  //   };
-
-  //   TODO: GET TRADES DATA
-  // FORMAT:
-  // { time: "2018-12-22", value: 32.51 },
-
-  // TODO: GET ACTIVITY DATA, last 10
-  // username, type (buy/sell), price, amount, timeAgo, link
-
-  // TODO: GET TOP HOLDERS DATA
-  // username, balance, percentage, link to their profile
 
   return (
     <div className="mt-4 mb-12">
@@ -528,45 +517,98 @@ export default function Bento({ username }: { username: string }) {
         </div>
 
         {/* New Bento Item: Tweet Actions */}
-        <div className="p-4 rounded-lg shadow-lg bg-card text-card-foreground min-h-96">
-          <h2 className="mb-2 text-lg font-semibold">Promote</h2>
-          <Tabs defaultValue="tweet">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="tweet">Tweet</TabsTrigger>
-              <TabsTrigger value="retweet">Retweet</TabsTrigger>
-              <TabsTrigger value="info">Info</TabsTrigger>
-            </TabsList>
-            <TabsContent value="tweet">
-              <div className="space-y-4">
-                <Textarea
-                  placeholder="Describe your proposal..."
-                  value={tweetContent}
-                  onChange={e => setTweetContent(e.target.value)}
-                />
-                <Button
-                  className="w-full"
-                  onClick={() => {
-                    //   TODO: LOGIC HERE TO SUBMIT TWEET
-                  }}
-                >
-                  Submit
-                </Button>
-                <p className="text-sm text-muted-foreground">Required amount 10 🍜</p>
-              </div>
-            </TabsContent>
-            <TabsContent value="retweet">
-              <p className="h-full py-8 text-center text-md text-muted-foreground">Coming soon...</p>
-            </TabsContent>
-            <TabsContent value="info">
-              <div className="space-y-4">
-                <p className="text-md text-muted-foreground">
-                  This feature allows you to propose tweets and retweets. Each action requires you to redeem noodles in
-                  exchange for visibility. Proposals are reviewed and executed if approved.
-                </p>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </div>
+        {visibilityQuery?.data?.services?.length > 0 ? (
+          <div className="p-4 rounded-lg shadow-lg bg-card text-card-foreground min-h-96">
+            <h2 className="mb-2 text-lg font-semibold">Promote</h2>
+            <Tabs defaultValue="tweet">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="tweet">Tweet</TabsTrigger>
+              </TabsList>
+              <TabsContent value="tweet">
+                <div className="space-y-4">
+                  <Textarea
+                    placeholder="Describe your proposal..."
+                    value={tweetContent}
+                    onChange={e => setTweetContent(e.target.value)}
+                  />
+                  <Button
+                    disabled={!(Number(visibilityQuery.data?.service?.balance) >= 10 && tweetContent?.length > 0)}
+                    className="w-full"
+                    onClick={async () => {
+                      setLoading(true);
+
+                      const wallet = wallets[0]; // Replace this with your desired wallet
+                      await wallet.switchChain(chain.id);
+                      const provider = await wallet.getEthereumProvider();
+
+                      const writeData = encodeFunctionData({
+                        // @ts-ignore
+                        abi: deployedContracts[534351].VisibilityServices.abi,
+                        functionName: "requestServiceExecution",
+                        args: [visibilityQuery.data?.service?.id, tweetContent],
+                      });
+
+                      const transactionRequest = {
+                        // @ts-ignore
+                        to: deployedContracts[534351].VisibilityServices.address,
+                        data: writeData,
+                      };
+
+                      try {
+                        const transactionHash = await provider.request({
+                          method: "eth_sendTransaction",
+                          params: [transactionRequest],
+                        });
+
+                        console.log("TRANSACTION HASH REQ SERVICE", transactionHash);
+                      } catch (error) {
+                        console.error("Error sending transaction:", error);
+                      }
+
+                      userBalanceQuery.refetch();
+                      visibilityQuery.refetch();
+                      setLoading(false);
+                    }}
+                  >
+                    {loading && (
+                      <svg
+                        className="w-5 h-5 mr-3 -ml-1 text-muted animate-spin"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          stroke-width="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                    )}
+                    {`${Number(visibilityQuery.data?.service?.balance) >= 10 ? "Submit" : "Insufficient balance"}`}
+                  </Button>
+                  <p className="text-sm text-muted-foreground">Required amount: 10 🍜</p>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+        ) : (
+          <div className="p-4 rounded-lg shadow-lg bg-card text-card-foreground min-h-96">
+            <h2 className="mb-2 text-lg font-semibold">Promote</h2>
+            <div className="space-y-4">
+              <p className="text-md text-muted-foreground">
+                This creator has not enabled the promotion feature yet. Check back later or reach out to them directly.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
